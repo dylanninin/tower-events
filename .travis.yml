@@ -4,7 +4,7 @@ rvm:
   - 2.4.0
 
 addons:
-  postgresql: "9.5"
+  postgresql: "9.4"
 
 service:
   - postgresql
