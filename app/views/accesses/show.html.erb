@@ -1,0 +1,34 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>User:</strong>
+  <%= @access.user %>
+</p>
+
+<p>
+  <strong>Team:</strong>
+  <%= @access.team %>
+</p>
+
+<p>
+  <strong>Role:</strong>
+  <%= @access.role %>
+</p>
+
+<p>
+  <strong>Accessable:</strong>
+  <%= @access.accessable %>
+</p>
+
+<p>
+  <strong>Creator:</strong>
+  <%= @access.creator %>
+</p>
+
+<p>
+  <strong>Deleted at:</strong>
+  <%= @access.deleted_at %>
+</p>
+
+<%= link_to 'Edit', edit_access_path(@access) %> |
+<%= link_to 'Back', accesses_path %>
