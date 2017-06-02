@@ -6,5 +6,5 @@ test:
 
 production:
   adapter: redis
-  url: redis://localhost:6379/1
-  channel_prefix: tower-events_production
+  url: <%= ENV.fetch('ACTION_CABLE_BACKEND_URL') %>
+  channel_prefix: <%= ENV.fetch('ACTION_CABLE_CHANNEL_PREFIX') %>

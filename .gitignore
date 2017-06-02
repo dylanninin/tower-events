@@ -135,3 +135,8 @@ bower.json
 .byebug_history
 
 # End of https://www.gitignore.io/api/Rails
+
+# For dotenv
+.env
+.env.local.*
+.env.production
