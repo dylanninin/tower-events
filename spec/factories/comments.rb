@@ -1,8 +1,8 @@
 FactoryGirl.define do
   factory :comment do
-    text "MyString"
-    commentable nil
-    team nil
-    creator nil
+    text { Faker::Lorem.sentence }
+    association :commentable, factory: :todo
+    association :team
+    association :creator, factory: :user
   end
 end

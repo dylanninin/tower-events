@@ -1,9 +1,9 @@
 FactoryGirl.define do
   factory :access do
-    user nil
-    team nil
-    role "MyString"
-    accessable nil
-    creator nil
+    association :user
+    role "role"
+    association :accessable, factory: :project
+    association :team
+    association :creator, factory: :user
   end
 end

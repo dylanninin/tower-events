@@ -1,8 +1,8 @@
 FactoryGirl.define do
   factory :report do
-    name "MyString"
-    content "MyString"
-    team nil
-    creator nil
+    name { Faker::Lorem.word }
+    content { Faker::Lorem.paragraph }
+    association :team
+    association :creator, factory: :user
   end
 end

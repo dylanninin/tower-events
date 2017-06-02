@@ -1,10 +1,10 @@
 FactoryGirl.define do
   factory :calendar_event do
-    name "MyString"
-    start_date "2017-06-02"
-    end_date "2017-06-02"
-    calendarable nil
-    team nil
-    creator nil
+    name { Faker::Lorem.word }
+    start_date { rand(1..5).days.from_now }
+    end_date { start_date + rand(1...5) }
+    association :calendarable, factory: :calendar
+    association :team
+    association :creator, factory: :user
   end
 end

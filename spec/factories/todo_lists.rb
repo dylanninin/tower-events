@@ -1,9 +1,8 @@
 FactoryGirl.define do
   factory :todo_list do
-    name "MyString"
-    status 1
-    project nil
-    team nil
-    creator nil
+    name { Faker::Lorem.word }
+    association :project
+    association :team
+    association :creator, factory: :user
   end
 end

@@ -1,7 +1,8 @@
 FactoryGirl.define do
   factory :team_member do
-    team nil
-    member nil
-    role "MyString"
+    association :team
+    association :member, factory: :user
+    role "role"
+    association :creator, factory: :user
   end
 end
