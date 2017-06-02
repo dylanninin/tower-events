@@ -6,6 +6,7 @@
   <thead>
     <tr>
       <th>Text</th>
+      <th>RepliedTo</th>
       <th>Commentable</th>
       <th>Team</th>
       <th>Creator</th>
@@ -18,6 +19,7 @@
     <% @comments.each do |comment| %>
       <tr>
         <td><%= comment.text %></td>
+        <td><%= comment.replied_to %></td>
         <td><%= comment.commentable %></td>
         <td><%= comment.team %></td>
         <td><%= comment.creator %></td>

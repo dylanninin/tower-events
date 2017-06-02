@@ -25,11 +25,13 @@ FG = FactoryGirl
     end
     FG.create_list(:todo_list, 2, project: pro, team: t, creator: u).each do |tl|
       FG.create_list(:todo, rand(1...5), todo_list: tl, project: pro, team: t, creator: u).each do |i|
-        FG.create_list(:comment, rand(1...5), commentable: i, team: t, creator: u)
+        cs = FG.create_list(:comment, rand(1...5), commentable: i, team: t, creator: u)
+        FG.create(:comment, replied_to_id: cs.sample.id, commentable: i, team: t, creator: u)
       end
     end
     FG.create_list(:calendar_event, rand(1...5), calendarable: pro, team: t, creator: u).each do |i|
-      FG.create_list(:comment, rand(1...5), commentable: i, team: t, creator: u)
+      cs = FG.create_list(:comment, rand(1...5), commentable: i, team: t, creator: u)
+      FG.create(:comment, replied_to_id: cs.sample.id, commentable: i, team: t, creator: u)
     end
   end
   FG.create_list(:report, 2, team: t, creator: u).each do |i|
@@ -37,7 +39,8 @@ FG = FactoryGirl
   end
   FG.create_list(:calendar, 2, team: t, creator: u).each do |cal|
     FG.create_list(:calendar_event, rand(1...5), calendarable: cal, team: t, creator: u).each do |i|
-      FG.create_list(:comment, rand(1...5), commentable: i, team: t, creator: u)
+      cs = FG.create_list(:comment, rand(1...5), commentable: i, team: t, creator: u)
+      FG.create(:comment, replied_to_id: cs.sample.id, commentable: i, team: t, creator: u)
     end
   end
 end

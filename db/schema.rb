@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170602122250) do
+ActiveRecord::Schema.define(version: 20170602130003) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -73,20 +73,12 @@ ActiveRecord::Schema.define(version: 20170602122250) do
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "replied_to_id"
     t.index ["commentable_type", "commentable_id"], name: "index_comments_on_commentable_type_and_commentable_id"
     t.index ["creator_id"], name: "index_comments_on_creator_id"
     t.index ["deleted_at"], name: "index_comments_on_deleted_at"
+    t.index ["replied_to_id"], name: "index_comments_on_replied_to_id"
     t.index ["team_id"], name: "index_comments_on_team_id"
-  end
-
-  create_table "dummies", force: :cascade do |t|
-    t.string "title"
-    t.string "description"
-    t.string "icon"
-    t.datetime "deleted_at"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["deleted_at"], name: "index_dummies_on_deleted_at"
   end
 
   create_table "events", force: :cascade do |t|

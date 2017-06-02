@@ -3,6 +3,8 @@
 
   <div class="form-inputs">
     <%= f.input :text %>
+    <%= f.input :replied_to %>
+    <%= f.association :commentable %>
     <%= f.association :commentable %>
     <%= f.association :team %>
     <%= f.association :creator %>
