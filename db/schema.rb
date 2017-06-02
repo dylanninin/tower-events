@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170602104753) do
+ActiveRecord::Schema.define(version: 20170602122250) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -87,6 +87,21 @@ ActiveRecord::Schema.define(version: 20170602104753) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["deleted_at"], name: "index_dummies_on_deleted_at"
+  end
+
+  create_table "events", force: :cascade do |t|
+    t.string "title"
+    t.text "content"
+    t.string "verb", limit: 20, null: false
+    t.json "actor"
+    t.json "object"
+    t.json "target"
+    t.json "generator"
+    t.json "provider"
+    t.datetime "deleted_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["deleted_at"], name: "index_events_on_deleted_at"
   end
 
   create_table "projects", force: :cascade do |t|
