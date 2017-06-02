@@ -35,6 +35,11 @@ gem 'jbuilder', '~> 2.5'
 # For dotenv
 gem 'dotenv-rails'
 
+# For frontend
+gem 'bootstrap-sass'
+gem 'simple_form'
+gem 'font-awesome-sass'
+
 gem 'cancancan'
 
 gem 'kaminari'

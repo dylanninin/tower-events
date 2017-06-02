@@ -140,3 +140,6 @@ bower.json
 .env
 .env.local.*
 .env.production
+
+# For node
+/node_modules/
