@@ -1,0 +1,31 @@
+# This is the configuration used to check the rubocop source code.
+Documentation:
+  Enabled: false
+
+AllCops:
+  Exclude:
+    - 'vendor/**/*'
+    - 'tmp/**/*'
+    - 'db/schema.rb'
+    - 'bin/*'
+    - 'config/**/*'
+  TargetRubyVersion: 2.4
+
+Style/Encoding:
+  EnforcedStyle: when_needed
+  Enabled: true
+
+Style/FrozenStringLiteralComment:
+  Enabled: false
+
+Metrics/LineLength:
+  Max: 1200
+
+Metrics/ClassLength:
+  Max: 1200
+
+Metrics/MethodLength:
+  Max: 1200
+
+Metrics/ModuleLength:
+  Max: 1200

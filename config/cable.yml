@@ -1,0 +1,10 @@
+development:
+  adapter: async
+
+test:
+  adapter: async
+
+production:
+  adapter: redis
+  url: <%= ENV.fetch('ACTION_CABLE_BACKEND_URL') %>
+  channel_prefix: <%= ENV.fetch('ACTION_CABLE_CHANNEL_PREFIX') %>

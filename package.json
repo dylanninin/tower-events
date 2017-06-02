@@ -1,0 +1,8 @@
+{
+  "name": "tower-events",
+  "private": true,
+  "dependencies": {
+    "font-awesome": "^4.7.0",
+    "jquery": "^3.2.1"
+  }
+}
