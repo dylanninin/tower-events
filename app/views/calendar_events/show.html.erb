@@ -1,0 +1,39 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @calendar_event.name %>
+</p>
+
+<p>
+  <strong>Start date:</strong>
+  <%= @calendar_event.start_date %>
+</p>
+
+<p>
+  <strong>End date:</strong>
+  <%= @calendar_event.end_date %>
+</p>
+
+<p>
+  <strong>Calendar:</strong>
+  <%= @calendar_event.calendar %>
+</p>
+
+<p>
+  <strong>Team:</strong>
+  <%= @calendar_event.team %>
+</p>
+
+<p>
+  <strong>Creator:</strong>
+  <%= @calendar_event.creator %>
+</p>
+
+<p>
+  <strong>Deleted at:</strong>
+  <%= @calendar_event.deleted_at %>
+</p>
+
+<%= link_to 'Edit', edit_calendar_event_path(@calendar_event) %> |
+<%= link_to 'Back', calendar_events_path %>

@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Name:</strong>
+  <%= @calendar.name %>
+</p>
+
+<p>
+  <strong>Color:</strong>
+  <%= @calendar.color %>
+</p>
+
+<p>
+  <strong>Team:</strong>
+  <%= @calendar.team %>
+</p>
+
+<p>
+  <strong>Creator:</strong>
+  <%= @calendar.creator %>
+</p>
+
+<p>
+  <strong>Deleted at:</strong>
+  <%= @calendar.deleted_at %>
+</p>
+
+<%= link_to 'Edit', edit_calendar_path(@calendar) %> |
+<%= link_to 'Back', calendars_path %>
