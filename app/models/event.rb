@@ -14,32 +14,13 @@ class Event < ApplicationRecord
       ws.inject(all, :merge)
     end
 
-    def create_todo(object)
+    # Todo verb: :create, :destroy, :run, :pause, :complete, :recover, :reopen
+    def normalized_ops_on_todo(object, verb)
       event = self.new
       event.actor = User.current.as_partial_event
-      event.verb = 'create'
+      event.verb = verb
       event.object = object.as_partial_event
       event.generator = object.team.as_partial_event
-      event.provider = object.team.as_partial_event
-      event.save
-    end
-
-    def destroy_todo(object)
-      event = self.new
-      event.actor = User.current.as_partial_event
-      event.verb = 'destroy'
-      event.object = object.as_partial_event
-      event.generator = object.team.as_partial_event
-      event.provider = object.team.as_partial_event
-      event.save
-    end
-
-    def complete_todo(object)
-      event = self.new
-      event.actor = User.current.as_partial_event
-      event.verb = 'complete'
-      event.object = object.as_partial_event
-      event.generator = oject.team.as_partial_event
       event.provider = object.team.as_partial_event
       event.save
     end
@@ -99,108 +80,50 @@ class Event < ApplicationRecord
       event.save
     end
 
-    def reply_todo(object)
+    # Team verb: :create, :destroy
+    def normalized_ops_on_team(object, verb)
       event = self.new
       event.actor = object.creator.as_partial_event
-      event.verb = 'reply'
-      event.object = object.as_partial_event
-      event.target = object.commentable.as_partial_event
-      event.generator = object.team.as_partial_event
-      event.provider = object.project.as_partial_event
-      event.save
-    end
-
-    def recover_todo(object)
-      event = self.new
-      event.actor = User.current.as_partial_event
-      event.verb = 'recover'
-      event.object = object.as_partial_event
-      event.generator = object.team.as_partial_event
-      event.provider = object.project.as_partial_event
-      event.save
-    end
-
-    def reopen_todo(object)
-      event = self.new
-      event.actor = User.current.as_partial_event
-      event.verb = 'reopen'
-      event.object = object.as_partial_event
-      event.generator = object.team.as_partial_event
-      event.provider = object.project.as_partial_event
-      event.save
-    end
-
-    def run_todo(object)
-      event = self.new
-      event.actor = User.current.as_partial_event
-      event.verb = 'run'
-      event.object = object.as_partial_event
-      event.generator = object.team.as_partial_event
-      event.provider = object.project.as_partial_event
-      event.save
-    end
-
-    def create_team(object)
-      event = self.new
-      event.actor = object.creator.as_partial_event
-      event.verb = 'create'
+      event.verb = verb
       event.object = object.as_partial_event
       event.generator = object.as_partial_event
       event.provider = object.as_partial_event
       event.save
     end
 
-    def create_project(object)
+    # Project verb: :create, :destroy
+    def normalized_ops_on_project(object, verb)
       event = self.new
       event.actor = object.creator.as_partial_event
-      event.verb = 'create'
+      event.verb = verb
       event.object = object.as_partial_event
       event.generator = object.team.as_partial_event
       event.provider = object.as_partial_event
       event.save
     end
 
-    def create_calendar_event(object)
+    # CalendarEvent verb: :create, :destroy, :edit
+    def normalized_ops_on_calendar_event(object, verb)
       event = self.new
       event.actor = object.creator.as_partial_event
-      event.verb = 'create'
+      event.verb = verb
       event.object = object.as_partial_event
       event.generator = object.team.as_partial_event
       event.provider = object.calendarable.as_partial_event
       event.save
     end
 
-    def reply_calendar_event(object, target)
-      event = self.new
-      event.actor = object.creator.as_partial_event
-      event.verb = 'reply'
-      event.object = object.as_partial_event
-      event.target = target.as_partial_event
-      event.generator = object.team.as_partial_event
-      event.provider = target.calendarable.as_partial_event
-      event.save
-    end
-
-    def edit_calendar_event(object)
+    # Comment verb: :reply, :like
+    def normalized_ops_on_comment(object, verb)
       event = self.new
       event.actor = User.current.as_partial_event
-      event.verb = 'edit'
-      event.object = object.as_partial_event
-      event.generator = object.team.as_partial_event
-      event.provider = object.calendarable.as_partial_event
-      event.save
-    end
-
-    def like_comment(object)
-      event = self.new
-      event.actor = User.current.as_partial_event
-      event.verb = 'like'
+      event.verb = verb
       event.object = object.as_partial_event
       event.target = object.commentable.as_partial_event
       event.generator = object.team.as_partial_event
       case object.commentable_type
       when 'Todo'
-        event.provider = object.project.as_partial_event
+        event.provider = object.commentable.project.as_partial_event
       when 'CalendarEvent'
         event.provider = object.commentable.calendarable.as_partial_event
       when 'Report'
