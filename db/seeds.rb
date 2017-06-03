@@ -13,6 +13,7 @@ FG = FactoryGirl
 
 10.times do
   u = FG.create(:user)
+  User.current = u
   t = FG.create(:team, creator: u)
   members = FG.create_list(:team_member, rand(1...5), member: FG.create(:user), team: t, creator: u).map(&:member)
   members << FG.create(:team_member, member: u, team: t, creator: u).member
