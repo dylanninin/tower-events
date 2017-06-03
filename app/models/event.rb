@@ -24,10 +24,10 @@ class Event < ApplicationRecord
       event.save
     end
 
-    def delete_todo(object)
+    def destroy_todo(object)
       event = self.new
       event.actor = User.current.as_partial_event
-      event.verb = 'delete'
+      event.verb = 'destroy'
       event.object = object.as_partial_event
       event.generator = object.team.as_partial_event
       event.provider = object.team.as_partial_event
