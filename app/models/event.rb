@@ -15,73 +15,37 @@ class Event < ApplicationRecord
     end
 
     # Todo verb: :create, :destroy, :run, :pause, :complete, :recover, :reopen
-    def normalized_ops_on_todo(object, verb)
+    def normalized_ops_on_todo(object, verb, opts = {})
       event = self.new
       event.actor = User.current.as_partial_event
       event.verb = verb
       event.object = object.as_partial_event
       event.generator = object.team.as_partial_event
-      event.provider = object.team.as_partial_event
-      event.save
-    end
-
-    def assign_todo(object, assignee)
-      event = self.new
-      event.actor = User.current.as_partial_event
-      event.verb = 'assign'
-      event.object = object.as_partial_event
-      event.target = assignee.as_partial_event
-      event.generator = object.team.as_partial_event
-      event.provider = object.project.as_partial_event
+      if opts[:provider]
+        event.provider = (object.send opts[:provider]).as_partial_event
+      else
+        event.provider = object.as_partial_event
+      end
       event.save
     end
 
     # FIXME: Injecting attributes into object introduces inconsistence.
-    def reassign_todo(object, old_assignee)
+    def audited_on_todo(object, verb, audited, opts = {})
       event = self.new
       event.actor = User.current.as_partial_event
-      event.verb = 'reassign'
-      object = object.as_partial_event
-      object['audited_attribute'] = 'assignee'
-      object['old_value'] = old_assignee.as_partial_event
-      object['new_value'] = object.assignee.as_partial_event
-      event.target = object.assignee.as_partial_event
-      event.generator = object.team.as_partial_event
-      event.provider = object.project.as_partial_event
-      event.save
-    end
-
-    # FIXME: Refine `set_due` to `set_due_to`
-    def set_due_to_todo(object, old_due_to)
-      event = self.new
-      event.actor = User.current.as_partial_event
-      event.verb = 'set_due_to'
-      o = object.as_partial_event
-      o['audited_attribute'] = 'due_to'
-      o['old_value'] = old_due_to.as_partial_event
-      o['new_value'] = object.due_to.as_partial_event
-      event.object = o
-      event.generator = object.team.as_partial_event
-      event.provider = object.project.as_partial_event
-      event.save
-    end
-
-    def duplicate_todo(object, times)
-      event = self.new
-      event.actor = User.current.as_partial_event
-      event.verb = 'duplicate'
-      o = object.as_partial_event
-      o['audited_attribute'] = 'times'
-      o['old_value'] = 0
-      o['new_value'] = times
-      event.object = o
+      event.verb = verb
+      event.object = object.as_partial_event
+      event.object[:audited] = audited
+      if opts[:target]
+        event.target = (object.send opts[:target]).as_partial_event
+      end
       event.generator = object.team.as_partial_event
       event.provider = object.project.as_partial_event
       event.save
     end
 
     # Team verb: :create, :destroy
-    def normalized_ops_on_team(object, verb)
+    def normalized_ops_on_team(object, verb, opts = {})
       event = self.new
       event.actor = object.creator.as_partial_event
       event.verb = verb
@@ -92,7 +56,7 @@ class Event < ApplicationRecord
     end
 
     # Project verb: :create, :destroy
-    def normalized_ops_on_project(object, verb)
+    def normalized_ops_on_project(object, verb, opts = {})
       event = self.new
       event.actor = object.creator.as_partial_event
       event.verb = verb
@@ -103,7 +67,7 @@ class Event < ApplicationRecord
     end
 
     # CalendarEvent verb: :create, :destroy, :edit
-    def normalized_ops_on_calendar_event(object, verb)
+    def normalized_ops_on_calendar_event(object, verb, opts = {})
       event = self.new
       event.actor = object.creator.as_partial_event
       event.verb = verb
@@ -114,7 +78,7 @@ class Event < ApplicationRecord
     end
 
     # Comment verb: :reply, :like
-    def normalized_ops_on_comment(object, verb)
+    def normalized_ops_on_comment(object, verb, opts = {})
       event = self.new
       event.actor = User.current.as_partial_event
       event.verb = verb
