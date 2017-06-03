@@ -31,4 +31,9 @@ class Comment < ApplicationRecord
     end
     provider
   end
+
+  # Default generator for all events
+  def eventablize_generator
+    team
+  end
 end

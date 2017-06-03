@@ -6,11 +6,13 @@ class Team < ApplicationRecord
 
   belongs_to :creator, class_name: 'User'
 
-  def eventablize_generator
+  # Default provider for all events
+  def eventablize_provider
     self
   end
 
-  def eventablize_provider
+  # Default generator for all events
+  def eventablize_generator
     self
   end
 end

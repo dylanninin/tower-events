@@ -55,7 +55,7 @@ module Eventable
           :new_value => opts[:value_proc] ? opts[:value_proc].call(change[1])&.as_partial_event : change[1]
         }
         opts[:object] = self
-        Event.add_event(**opts)
+        Event.create_event(**opts)
       end
     end
   end
@@ -97,7 +97,7 @@ module Eventable
       self.send(:after_commit, proc {
         opts[:verb] ||= ctx
         opts[:object] = self
-        Event.add_event(**opts)
+        Event.create_event(**opts)
       }, on: ctx)
     end
   end

@@ -25,4 +25,9 @@ class Todo < ApplicationRecord
   def eventablize_provider
     project
   end
+
+  # Default generator for all events
+  def eventablize_generator
+    team
+  end
 end
