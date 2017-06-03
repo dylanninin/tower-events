@@ -30,12 +30,28 @@ RSpec.describe Todo, type: :model do
     end
 
     it 'destroy' do
-      t = create(:todo)
+      t = create(:todo, deleted_at: nil)
       t.destroy
 
       e = Event.find_by(object: t, verb: 'destroy').first
-      #: Destroy event
-      # expect(e).not_to be_nil
+      expect(e).not_to be_nil
+
+      expect(e.actor['id']).to eq User.current.id
+      expect(e.actor['type']).to eq 'User'
+
+      expect(e.object['type']).to eq 'Todo'
+      expect(e.object['id']).to eq t.id
+
+      expect(e.target).to be_nil
+
+      expect(e.generator['type']).to eq 'Team'
+      expect(e.generator['id']).to eq t.team_id
+
+      expect(e.provider['type']).to eq 'Project'
+      expect(e.provider['id']).to eq t.project.id
+
+      t = Todo.with_deleted.find(t.id)
+      expect(t.deleted?).to be_truthy
     end
 
     it 'run' do

@@ -2,6 +2,16 @@ module Eventable
   extend ActiveSupport::Concern
 
   included do
+    # FIXME: For soft delete. `update_columns` will skip callbacks
+    # So, re-invent it
+    # => soft delete by update attributes
+    # => see `eventablize_soft_delete` in `eventablize_ops_context`
+    def soft_delete
+      self.deleted_at = Time.now
+      self.save
+    end
+    alias_method :destroy, :soft_delete
+
     # To partial event: json format
     def as_partial_event
       keys = self.class.instance_variable_get(:@_eventablize_serializer_attrs) || []
@@ -70,11 +80,18 @@ module Eventable
       end
     end
 
+    # For soft delete
+    def eventablize_soft_delete
+      opts = { verb: :destroy, attr: :deleted_at, old_value: -> (v) { v.nil? },  new_value: -> (v) { v.present? } }
+      eventablize_attrs_audited(**opts)
+    end
+
     # Define any ops context: :create, :update, :destroy
     def eventablize_ops_context(ctx, opts = {})
       raise ArgumentError.new("unsupported context: #{ctx}") unless AVALIABLE_OPS_CONTEXT_SCOPE.include? ctx
 
       return eventablize_attrs_audited(**opts) if opts[:attr].present?
+      return eventablize_soft_delete if ctx == :destroy
 
       verb = opts[:verb] || ctx
       self.send(:after_commit, proc {
