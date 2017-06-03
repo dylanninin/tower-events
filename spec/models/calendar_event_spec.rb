@@ -1,5 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe CalendarEvent, type: :model do
-  pending "add some examples to (or delete) #{__FILE__}"
+  before(:each) do
+    User.current = create(:user)
+  end
+
+  it 'successfully' do
+    create(:calendar_event)
+  end
 end

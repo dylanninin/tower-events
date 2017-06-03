@@ -1,4 +1,9 @@
 class Comment < ApplicationRecord
+  include Eventable
+  eventablize_serializer_attrs :text
+  eventablize_ops_context :create, verb: :reply, provider: :commentable
+  eventablize_ops_context :destroy
+
   belongs_to :commentable, polymorphic: true
   belongs_to :team
   belongs_to :creator, class_name: 'User'
