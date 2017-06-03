@@ -5,4 +5,12 @@ class Team < ApplicationRecord
   eventablize_ops_context :destroy
 
   belongs_to :creator, class_name: 'User'
+
+  def eventablize_generator
+    self
+  end
+
+  def eventablize_provider
+    self
+  end
 end

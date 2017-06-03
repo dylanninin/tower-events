@@ -1,7 +1,7 @@
 class Todo < ApplicationRecord
   include Eventable
   eventablize_serializer_attrs :name
-  eventablize_ops_context :create, provider: :project
+  eventablize_ops_context :create
   eventablize_ops_context :destroy
   # FIXME: For consistency, set_due rename to set_due_to
   eventablize_ops_context :update, verb: :set_due_to, attr: :due_to
@@ -20,4 +20,9 @@ class Todo < ApplicationRecord
   belongs_to :project
   belongs_to :team
   belongs_to :creator, class_name: 'User'
+
+  # Default provider for all events
+  def eventablize_provider
+    project
+  end
 end

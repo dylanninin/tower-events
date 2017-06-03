@@ -8,4 +8,9 @@ class CalendarEvent < ApplicationRecord
   belongs_to :calendarable, polymorphic: true
   belongs_to :team
   belongs_to :creator, class_name: 'User'
+
+  # Default provider for all events
+  def eventablize_provider
+    calendarable
+  end
 end

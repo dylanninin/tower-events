@@ -49,14 +49,13 @@ module Eventable
         # FIXME: Get referenced object by field like 'assignee_id'
         # => attr_alias is an alias for audited attr
         # => value_proc is the proc to get value of the attr
-        audited = {
+        opts[:audited] = {
           :attribute => opts[:attr_alias] || k,
           :old_value => opts[:value_proc] ? opts[:value_proc].call(change[0])&.as_partial_event : change[0],
           :new_value => opts[:value_proc] ? opts[:value_proc].call(change[1])&.as_partial_event : change[1]
         }
-        %i(object verb aduited).each {|i| opts.delete(i) }
-        m = :"audited_on_#{self.class.name.underscore}"
-        Event.send(m, self, v, audited, **opts)
+        opts[:object] = self
+        Event.add_event(**opts)
       end
     end
   end
@@ -95,11 +94,10 @@ module Eventable
       return eventablize_attrs_audited(**opts) if opts[:attr].present?
       return eventablize_soft_delete if ctx == :destroy
 
-      verb = opts[:verb] || ctx
       self.send(:after_commit, proc {
-        m = :"normalized_ops_on_#{self.class.name.underscore}"
-        %i(object verb).each {|i| opts.delete(i) }
-        Event.send(m, self, verb, **opts)
+        opts[:verb] ||= ctx
+        opts[:object] = self
+        Event.add_event(**opts)
       }, on: ctx)
     end
   end
