@@ -32,7 +32,7 @@ module Eventable
         next unless change.present?
 
         need_audit = true
-        %i(old_value new_value).each_with_index do |v, i|
+        %i(old_value? new_value?).each_with_index do |v, i|
           c = opts[v]
           next if c.blank?
           # p opts, v, i, c, change, c.call(change[i])
