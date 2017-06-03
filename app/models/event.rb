@@ -66,6 +66,10 @@ class Event < ApplicationRecord
       event.save
     end
 
+    # FIXME: Report/Calendar ops just like project
+    alias_method :normalized_ops_on_report, :normalized_ops_on_project
+    alias_method :normalized_ops_on_calendar, :normalized_ops_on_project
+
     # CalendarEvent verb: :create, :destroy, :edit
     def normalized_ops_on_calendar_event(object, verb, opts = {})
       event = self.new

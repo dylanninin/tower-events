@@ -46,11 +46,13 @@ module Eventable
         next unless need_audit
 
         # Generate event
-        # TODO: Get referenced object by field like 'assignee_id'
+        # FIXME: Get referenced object by field like 'assignee_id'
+        # => attr_alias is an alias for audited attr
+        # => value_proc is the proc to get value of the attr
         audited = {
-          :attribute => k,
-          :old_value => change[0],
-          :new_value => change[1]
+          :attribute => opts[:attr_alias] || k,
+          :old_value => opts[:value_proc] ? opts[:value_proc].call(change[0])&.as_partial_event : change[0],
+          :new_value => opts[:value_proc] ? opts[:value_proc].call(change[1])&.as_partial_event : change[1]
         }
         %i(object verb aduited).each {|i| opts.delete(i) }
         m = :"audited_on_#{self.class.name.underscore}"

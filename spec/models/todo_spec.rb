@@ -161,8 +161,8 @@ RSpec.describe Todo, type: :model do
       expect(e.object['type']).to eq 'Todo'
       expect(e.object['id']).to eq t.id
 
-      # audited = { attribute: 'assignee', old_value: old_value, new_value: new_value }
-      # expect(e.object['audited']).to eq audited.as_json
+      audited = { attribute: 'assignee', old_value: nil, new_value: new_value.as_partial_event }
+      expect(e.object['audited']).to eq audited.as_json
 
       expect(e.target['type']).to eq 'User'
       expect(e.target['id']).to eq new_value.id
@@ -189,8 +189,8 @@ RSpec.describe Todo, type: :model do
       expect(e.object['type']).to eq 'Todo'
       expect(e.object['id']).to eq t.id
 
-      # audited = { attribute: 'assignee', old_value: old_value, new_value: new_value }
-      # expect(e.object['audited']).to eq audited.as_json
+      audited = { attribute: 'assignee', old_value: old_value.as_partial_event, new_value: new_value.as_partial_event }
+      expect(e.object['audited']).to eq audited.as_json
 
       expect(e.target['type']).to eq 'User'
       expect(e.target['id']).to eq new_value.id
