@@ -1,0 +1,50 @@
+// Place all the styles related to the Users controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+.events {
+  padding: 10px;
+  margin: 20px;
+  border: 1px solid #eee;
+  border-radius: 3px;
+
+  .event-group {
+    padding: 10px;
+    margin-bottom: 20px;
+
+    .group-title {
+      padding: 5px 0;
+      color: #999;
+      border-bottom: 1px solid #eee;
+    }
+  }
+
+  .event {
+    margin: 0;
+    padding: 10px 0px;
+    color: #999;
+    float: none;
+
+    a { color: #555; }
+
+    .event-left {
+      float: left;
+      margin-right: 10px;
+    }
+
+    .event-body {
+    }
+
+    .actor-avatar {
+       width: 32px;
+       height: 32px;
+       border-radius: 120px;
+    }
+
+    .event-right {
+      min-width: 100px;
+      color: #AAA;
+      font-size: 13px;
+      float: right;
+    }
+  }
+}

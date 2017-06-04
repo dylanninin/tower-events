@@ -1,0 +1,17 @@
+<div id="event-<%= event.id %>" class="event">
+  <div class="event-left">
+    <%= event.published %>
+    <img class="actor-avatar" src='<%= event.actor['avatar']%>' height="50px" width="50px">
+    <a href="/<%= event.actor['type'].underscore.pluralize %>/<%= event.actor['id'] %>"><%= event.actor['name'] %></a>
+  </div>
+  <div class="event-body">
+    <% if %w(assign reassign reply set_due_to).include? event.verb %>
+    <%= render partial: "events/partial/#{event.verb}", locals: {event: event} %>
+    <% else %>
+    <%= render partial: 'events/partial/default', locals: {event: event} %>
+    <% end %>
+  </div>
+  <div class="event-right">
+    <a href="/<%= event.provider['type'].underscore.pluralize %>/<%= event.provider['id'] %>"><%= event.provider['name'] %></a>
+  </div>
+</div>

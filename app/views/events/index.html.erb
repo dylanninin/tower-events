@@ -1,27 +1,12 @@
+<div class="events">
 <p id="notice"><%= notice %></p>
 
 <h1>Events</h1>
 
-<table>
-  <thead>
-    <tr>
-      <th>Published</th>
-      <th>Title</th>
-      <th>Content</th>
-      <th>Provider</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    <% @events.each do |event| %>
-      <tr>
-        <td><%= event.published %><i><img src='<%= event.actor['avatar']%>' height="50px" width="50px"></i></td>
-        <td><%= event.title %></td>
-        <td><%= event.content %></td>
-        <td><%= event.provider['type'] %>: <%= event.provider['name']%></td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
-
-<br>
+<% @event_groups.each do |group, events| %>
+  <div class="event-group">
+    <div class="group-title"><%= group %></div>
+    <%= render events %>
+  </div>
+<% end %>
+</div>
