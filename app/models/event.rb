@@ -20,11 +20,12 @@ class Event < ApplicationRecord
       event = self.new
       event.actor = event_partial(object, :actor, opts, event_default_actor)
       event.verb = opts[:verb]
-      event.object = opts[:object]&.as_partial_event
+      event.object = object&.as_partial_event
       event.object[:audited] = opts[:audited] if opts[:audited].present? && event.object.present?
       event.target = event_partial(object, :target, opts)
       event.generator = event_partial(object, :generator, opts)
       event.provider = event_partial(object, :provider, opts)
+      event.published = object.updated_at
       event.save
     end
 
