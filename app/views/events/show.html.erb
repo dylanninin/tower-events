@@ -1,0 +1,49 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Published:</strong>
+  <%= @event.published %>
+</p>
+
+<p>
+  <strong>Actor:</strong>
+  <%= @event.actor %>
+</p>
+
+<p>
+  <strong>Verb:</strong>
+  <%= @event.verb %>
+</p>
+
+<p>
+  <strong>Title:</strong>
+  <%= @event.title %>
+</p>
+
+<p>
+  <strong>Content:</strong>
+  <%= @event.content %>
+</p>
+
+<p>
+  <strong>Object:</strong>
+  <%= @event.object %>
+</p>
+
+<p>
+  <strong>Target:</strong>
+  <%= @event.target %>
+</p>
+
+<p>
+  <strong>Provider:</strong>
+  <%= @event.provider %>
+</p>
+
+<p>
+  <strong>Generator:</strong>
+  <%= @event.generator %>
+</p>
+
+<%= link_to 'Edit', edit_event_path(@event) %> |
+<%= link_to 'Back', events_path %>

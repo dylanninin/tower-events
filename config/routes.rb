@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  resources :events
   resources :accesses
   resources :comments
   resources :todos
