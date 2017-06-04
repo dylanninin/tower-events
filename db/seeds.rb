@@ -45,3 +45,9 @@ FG = FactoryGirl
     end
   end
 end
+
+# Update the published for random timestamp
+Event.select(:id, :published).order('random()').each do |event|
+  event.published -= rand * rand(1...30) * 86400
+  event.save
+end

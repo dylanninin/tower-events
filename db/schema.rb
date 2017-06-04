@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170602130003) do
+ActiveRecord::Schema.define(version: 20170604041011) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -85,14 +85,15 @@ ActiveRecord::Schema.define(version: 20170602130003) do
     t.string "title"
     t.text "content"
     t.string "verb", limit: 20, null: false
-    t.json "actor"
-    t.json "object"
-    t.json "target"
-    t.json "generator"
-    t.json "provider"
+    t.jsonb "actor", null: false
+    t.jsonb "object", null: false
+    t.jsonb "target"
+    t.jsonb "generator"
+    t.jsonb "provider"
     t.datetime "deleted_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "published", null: false
     t.index ["deleted_at"], name: "index_events_on_deleted_at"
   end
 

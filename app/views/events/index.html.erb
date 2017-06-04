@@ -1,0 +1,12 @@
+<div class="events">
+<h1>Events</h1>
+
+<div class="event-groups">
+<%= render partial: 'events', object: @event_groups %>
+</div>
+
+<p class="pagination">
+  <%= link_to_next_page(@events, 'Next Page', :remote => true) %>
+</p>
+
+</div>
