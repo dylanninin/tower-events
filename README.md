@@ -3,7 +3,7 @@ Events System of Tower.im
 
 [![Build Status](https://travis-ci.org/dylanninin/tower-events.svg?branch=master)](https://travis-ci.org/dylanninin/tower-events)
 
-#### Design
+# Design
 
 抽象模型。主要参考 [JSON Activity Streams 1.0](http://activitystrea.ms/specs/json/1.0/)。
 
@@ -38,7 +38,7 @@ event 可以抽象为：`[someone] [did an action] [on|with an object] [to|again
 - [#2 系统设计](https://github.com/dylanninin/tower-events/issues/2)
 - [JSON Activity Streams 1.0](http://activitystrea.ms/specs/json/1.0/)
 
-#### Implementation
+# Implementation
 
 主要利用 `rails` 提供的机制：
 - `callbacks`:  实现生成 `event` 的 同步回调
@@ -152,7 +152,7 @@ end
 - https://github.com/rails/rails/pull/21114
 - [#8 Event实现](https://github.com/dylanninin/tower-events/issues/8)
 
-#### Views
+# Views
 
 根据要求：
 - `events` 先按照日期聚合，日期内再按照连续的项目、日历或者周报（即 `provider`）来聚合，即有嵌套分组。`EventsController`: [app/controllers/events_controller.rb](app/controllers/events_controller.rb)
@@ -170,12 +170,12 @@ end
 - https://github.com/magoosh/jquery-infinite-pages
 - [#9 UI 实现 - 动态页面](https://github.com/dylanninin/tower-events/issues/9)
 
-#### Testing
+# Testing
 
 - seed: [db/seeds.rb](db/seeds.rb)
 - spec: [spec/models/todo_rspec.rb](spec/models/todo_spec.rb)
 
-#### Demo
+# Demo
 
 localhost, open 'http://localhost:3000/events' after doing following steps
 - `rails db:create`
@@ -185,6 +185,6 @@ localhost, open 'http://localhost:3000/events' after doing following steps
 
 online: TODO
 
-#### One more thing
+# One more thing
 
 TODO
