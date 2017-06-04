@@ -1,7 +1,13 @@
 class Event < ApplicationRecord
 
   class << self
-    # Find event by
+    # Find event by: pass norrmal model object
+    # eg:
+    # => u, o = User.first, Todo.first
+    # => Event.find_by(verb: 'create') # return all `create` events
+    # => Event.find_by(verb: 'create', actor: u) # return all `create` events by this actor
+    # => Event.find_by(verb: 'create', actor: u, object: o) # return all `create` events about that object by this actor
+    # => Event.find_by # return all events, same with Event.all
     def find_by(opts = {})
       ws = []
       %i(actor object target generator provider).each do |s|
@@ -38,11 +44,13 @@ class Event < ApplicationRecord
       partial&.as_partial_event
     end
 
+    # Default user, see User.current
     def event_default_actor
       User.current
     end
   end
 
+  # TODO: Title can be removed
   # For flexibility, title has not been persisted
   def title
     words = []
@@ -80,6 +88,7 @@ class Event < ApplicationRecord
     words.join(' ')
   end
 
+  # TODO: Content can be removed
   # For flexibility, content has not been persisted
   def content
     case verb
