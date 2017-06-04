@@ -1,0 +1,6 @@
+<% @event_groups.each do |group, events| %>
+  <div class="event-group">
+    <div class="group-title"><%= group %></div>
+    <%= render events %>
+  </div>
+<% end %>
