@@ -114,7 +114,7 @@ end
 
 不足之处
 - 实现受限于 `rails` 的 callback 机制
-- 对比 `assignee`,`set_due_to`(即 `audited`）的设计、实现，其实与其他 `verb` 很不一致，之前的考虑见  `https://github.com/dylanninin/tower-events/issues/2#issuecomment-305469983`   
+- 对比 `assignee`,`set_due_to`(即 `audited`）的设计、实现，其实与其他 `verb` 很不一致，之前的考虑见  https://github.com/dylanninin/tower-events/issues/2#issuecomment-305469983   
 
 源代码
 - `Eventable`: [app/models/concerns/eventable.rb](app/models/concerns/eventable.rb)
@@ -177,7 +177,7 @@ end
 
 # Demo
 
-localhost, open 'http://localhost:3000/events' after doing following steps
+localhost, open http://localhost:3000/events after doing following steps
 - `rails db:create`
 - `rails db:migrate`
 - `rails db:seed`
