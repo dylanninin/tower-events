@@ -1,6 +1,11 @@
-<% @event_groups.each do |group, events| %>
+<% @event_groups.each do |by_date_event, events| %>
   <div class="event-group">
-    <div class="group-title"><%= group %></div>
-    <%= render events %>
+    <div class="group-title"><%= by_date_event.published.to_date %></div>
+    <% events.each do |by_provider_event, events| %>
+      <div class="group-section">
+        <a href="/<%= by_provider_event.provider['type'].underscore.pluralize %>/<%= by_provider_event.provider['id'] %>"><%= by_provider_event.provider['name'] %></a>
+      </div>
+      <%= render events %>
+    <% end %>
   </div>
 <% end %>

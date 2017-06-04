@@ -12,9 +12,14 @@
     margin-bottom: 20px;
 
     .group-title {
-      padding: 5px 0;
       color: #999;
       border-bottom: 1px solid #eee;
+    }
+
+    .group-section {
+      color: #999;
+      border-bottom: 1px solid #eee;
+      text-align: right;
     }
   }
 
@@ -28,8 +33,9 @@
 
     .event-left {
       float: left;
-      margin-right: 10px;
-      min-width: 300px;
+      margin-left: 20px;
+      margin-right: 20px;
+      min-width: 200px;
     }
 
     .event-body {

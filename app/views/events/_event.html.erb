@@ -1,6 +1,6 @@
 <div id="event-<%= event.id %>" class="event">
   <div class="event-left">
-    <%= event.published %>
+    <%= event.published.strftime('%H:%M') %>
     <img class="actor-avatar" src='<%= event.actor['avatar']%>' height="50px" width="50px">
     <a href="/<%= event.actor['type'].underscore.pluralize %>/<%= event.actor['id'] %>"><%= event.actor['name'] %></a>
   </div>
@@ -10,8 +10,5 @@
     <% else %>
     <%= render partial: 'events/partial/default', locals: {event: event} %>
     <% end %>
-  </div>
-  <div class="event-right">
-    <a href="/<%= event.provider['type'].underscore.pluralize %>/<%= event.provider['id'] %>"><%= event.provider['name'] %></a>
   </div>
 </div>
