@@ -177,7 +177,13 @@ end
 
 #### Demo
 
-TODO
+localhost, open 'http://localhost:3000/events' after doing following steps
+- `rails db:create`
+- `rails db:migrate`
+- `rails db:seed`
+- `rails s`
+
+online: TODO
 
 #### One more thing
 
