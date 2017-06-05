@@ -18,6 +18,8 @@ module Eventable
       keys.concat %i(id creator_id created_at updated_at)
       json = as_json(only: keys)
       json[:type] = self.class.name
+      # FIXME: Convert id to string, for gin index in PostgreSQL
+      json[:id] = self.id.to_s
       json
     end
 

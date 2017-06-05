@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170604041011) do
+ActiveRecord::Schema.define(version: 20170605012650) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -94,7 +94,10 @@ ActiveRecord::Schema.define(version: 20170604041011) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.datetime "published", null: false
+    t.index "((generator -> 'id'::text)), ((generator -> 'type'::text))", name: "index_events_on_generator", using: :gin
+    t.index "((object -> 'id'::text)), ((object -> 'type'::text))", name: "index_events_on_object", using: :gin
     t.index ["deleted_at"], name: "index_events_on_deleted_at"
+    t.index ["published"], name: "index_events_on_published"
   end
 
   create_table "projects", force: :cascade do |t|
