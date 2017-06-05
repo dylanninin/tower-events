@@ -183,7 +183,12 @@ localhost, open http://localhost:3000/events after doing following steps
 - `rails db:seed`
 - `rails s`
 
-online: TODO
+online: https://awesome-tower-events.herokuapp.com/
+
+参考
+- https://devcenter.heroku.com/articles/getting-started-with-rails5
+- https://devcenter.heroku.com/articles/using-multiple-buildpacks-for-an-app
+- https://devcenter.heroku.com/articles/pre-provision-database
 
 # Indexing
 
