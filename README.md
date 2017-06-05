@@ -53,7 +53,7 @@ event 可以抽象为：`[someone] [did an action] [on|with an object] [to|again
   - target：Symbol. 指定 event.target
   - provider: Symbol. 默认为 `:eventablize_provider`
   - generator: Symbol. 默认为 `:eventablize_generator`
-  - actor: 直接从 `User.current` 中获取，为 `Thread.current` 变量
+  - actor: Symbol. 即当前操作者，默认直接从 User.current 中获取，为 Thread.current 变量
   - attr：Symbol. 即要跟踪变化的属性.
   - attr_alias：Symbol. 属性别名，若不指定默认为 `attr` 取值。例如 `attr: :assignee_id`, `attr_alias: :assignee`，则在 `audited[attribute] = :assignee`
   - value_proc：Proc. 指定 event.object.audited 中 `old|new_value` 的求值 `proc`，若不指定默认为原始值

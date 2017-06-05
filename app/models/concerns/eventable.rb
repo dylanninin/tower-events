@@ -87,7 +87,29 @@ module Eventable
       eventablize_attrs_audited(**opts)
     end
 
-    # Define any ops context: :create, :update, :destroy
+    # Define any ops context for create events
+    # examples
+    # * eventablize_ops_context :create will create a event after create
+    # * eventablize_ops_context :destroy will create a event after destroy
+    # * eventablize_ops_context :update will create a event after update
+    # * eventablize_ops_context :update, verb: :reopen, attr: :status, old_value?: -> (v) { v == 'completed' },  new_value?: -> (v) { v == 'open' } will create a event after status has been changed from completed to open
+    # more examples see Todo.rb
+    #
+    # ctx:
+    # Symbol. 主要是 :create, :destroy, :update
+    #
+    # opts:
+    # verb: Symbol. 指定 event.verb，默认同 ctx.
+    # target：Symbol. 指定 event.target
+    # provider: Symbol. 默认为 :eventablize_provider
+    # generator: Symbol. 默认为 :eventablize_generator
+    # actor：Symbol. 即当前操作者，默认直接从 User.current 中获取，为 Thread.current 变量
+    # attr：Symbol. 即要跟踪变化的属性.
+    # attr_alias：Symbol. 属性别名，若不指定默认为 attr 取值。例如 attr: :assignee_id, attr_alias: :assignee，则在 audited[attribute] = :assignee
+    # value_proc：Proc. 指定 event.object.audited 中 old|new_value 的求值 proc，若不指定默认为原始值
+    # old_value?：Proc. 指定数据属性取值变化时，旧的取值是否满足当前 verb 的要求。如 open|reopen|complete 等动作均是对 Todo.status 属性操作，此时需要验证以作区分。
+    # new_value?：Proc. 指定数据属性取值变化时，新的取值是否满足当前 verb 的要求。如 open|reopen|complete 等动作均是对 Todo.status 属性操作，此时需要验证以作区分。
+    #
     def eventablize_ops_context(ctx, opts = {})
       raise ArgumentError.new("unsupported context: #{ctx}") unless AVALIABLE_OPS_CONTEXT_SCOPE.include? ctx
 
