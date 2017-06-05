@@ -13,4 +13,4 @@ Rails.application.config.assets.paths << Rails.root.join('node_modules')
 # folder are already added.
 Rails.application.config.assets.precompile += %w( accesses.css calendar_events.css
 calendars.css comments.css events.css projects.css reports.css teams.css
-todo_list.css todos.css users.css)
+todo_lists.css todos.css users.css)
