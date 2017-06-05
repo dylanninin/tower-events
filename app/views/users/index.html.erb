@@ -16,7 +16,7 @@
   <tbody>
     <% @users.each do |user| %>
       <tr>
-        <td><%= user.avatar %></td>
+        <td><img class="avatar" src="<%= user.avatar %>"></td>
         <td><%= user.name %></td>
         <td><%= user.email %></td>
         <td><%= user.deleted_at %></td>
@@ -31,3 +31,5 @@
 <br>
 
 <%= link_to 'New User', new_user_path %>
+
+<%= paginate @users %>

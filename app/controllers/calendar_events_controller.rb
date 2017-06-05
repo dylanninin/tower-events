@@ -4,7 +4,7 @@ class CalendarEventsController < ApplicationController
   # GET /calendar_events
   # GET /calendar_events.json
   def index
-    @calendar_events = CalendarEvent.all
+    @calendar_events = CalendarEvent.page(params[:page])
   end
 
   # GET /calendar_events/1

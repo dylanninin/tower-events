@@ -4,7 +4,7 @@ class AccessesController < ApplicationController
   # GET /accesses
   # GET /accesses.json
   def index
-    @accesses = Access.all
+    @accesses = Access.page(params[:page])
   end
 
   # GET /accesses/1
