@@ -185,6 +185,18 @@ localhost, open http://localhost:3000/events after doing following steps
 
 online: TODO
 
+# Indexing
+
+目前 `events` 的使用场景，主要是：
+
+- 一个 team 的所有动态。即 filter by generator 是一个常见操作
+- 一个 object 的所有动态，包含 object + target
+  - 比如 一个 todo 的所有主要变更记录，如创建、删除、完成、修改完成者/时间，即 filter by object 是一个常见操作
+  - 比如 一个 todo 的所有回复操作，此时不需要展示此类动态，直接查询 `comments` 即可。即暂无 filter by target 的需求
+- 以上需求中，所有动态需要按发生时间排序。即 order by published 是一个常见操作
+
+故主要针对以上场景建立索引，提升查询效率，见 [add_indices_to_events.rb](db/migrate/20170605012650_add_indices_to_events.rb)
+
 # One more thing
 
 TODO

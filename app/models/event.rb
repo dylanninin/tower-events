@@ -13,7 +13,7 @@ class Event < ApplicationRecord
       %i(actor object target generator provider).each do |s|
         i = opts[s]
         if i.present?
-          ws << where("#{s} ->> 'id' = '#{i.id}' and #{s} ->> 'type' = '#{i.class.name}'")
+          ws << where("#{s}->'id' ? '#{i.id}' and #{s} -> 'type' ? '#{i.class.name}'")
         end
       end
       ws << where(verb: opts[:verb]) if opts[:verb].present?
