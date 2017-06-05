@@ -51,13 +51,15 @@ gem 'sentry-raven'
 # For apm
 gem 'newrelic_rpm'
 
+# For seed
+gem 'factory_girl_rails', '~> 4.0'
+gem 'faker', '~> 1.7.0'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
   gem 'capybara', '~> 2.3.0'
   gem 'database_cleaner'
-  gem 'factory_girl_rails', '~> 4.0'
-  gem 'faker', '~> 1.7.0'
   gem 'rspec-rails', '~> 3.5'
   gem 'simplecov'
 end
