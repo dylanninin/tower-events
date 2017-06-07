@@ -8,13 +8,13 @@ class Todo < ApplicationRecord
   belongs_to :team
   belongs_to :creator, class_name: 'User'
 
-  after_create_commit :add_event_after_create_todo
-  def add_event_after_create_todo
+  after_create_commit :add_event_after_create
+  def add_event_after_create
     Event.create_event(verb: :create, object: self)
   end
 
-  around_update :add_event_after_assign_todo
-  def add_event_after_assign_todo
+  around_update :add_event_after_assign
+  def add_event_after_assign
     yield
     changed_attribute = {
       name: :assignee_id,
@@ -25,8 +25,8 @@ class Todo < ApplicationRecord
     Event.create_event(verb: :assign, object: self, target: :assignee, changed_attribute: changed_attribute)
   end
 
-  around_update :add_event_after_reassign_todo
-  def add_event_after_reassign_todo
+  around_update :add_event_after_reassign
+  def add_event_after_reassign
     yield
     changed_attribute = {
       name: :assignee_id,
@@ -38,8 +38,8 @@ class Todo < ApplicationRecord
     Event.create_event(verb: :reassign, object: self, target: :assignee, changed_attribute: changed_attribute)
   end
 
-  around_update :add_event_after_set_due_to_todo
-  def add_event_after_set_due_to_todo
+  around_update :add_event_after_set_due_to
+  def add_event_after_set_due_to
     yield
     changed_attribute = {
       name: :due_to
@@ -47,8 +47,8 @@ class Todo < ApplicationRecord
     Event.create_event(verb: :set_due_to, object: self, changed_attribute: changed_attribute)
   end
 
-  around_update :add_event_after_run_todo
-  def add_event_after_run_todo
+  around_update :add_event_after_run
+  def add_event_after_run
     yield
     changed_attribute = {
       name: :status,
@@ -57,8 +57,8 @@ class Todo < ApplicationRecord
     Event.create_event(verb: :run, object: self, changed_attribute: changed_attribute)
   end
 
-  around_update :add_event_after_pause_todo
-  def add_event_after_pause_todo
+  around_update :add_event_after_pause
+  def add_event_after_pause
     yield
     changed_attribute = {
       name: :status,
@@ -67,8 +67,8 @@ class Todo < ApplicationRecord
     Event.create_event(verb: :pause, object: self, changed_attribute: changed_attribute)
   end
 
-  around_update :add_event_after_complete_todo
-  def add_event_after_complete_todo
+  around_update :add_event_after_complete
+  def add_event_after_complete
     yield
     changed_attribute = {
       name: :status,
@@ -77,8 +77,8 @@ class Todo < ApplicationRecord
     Event.create_event(verb: :complete, object: self, changed_attribute: changed_attribute)
   end
 
-  around_update :add_event_after_reopen_todo
-  def add_event_after_reopen_todo
+  around_update :add_event_after_reopen
+  def add_event_after_reopen
     yield
     changed_attribute = {
       name: :status,
@@ -87,8 +87,8 @@ class Todo < ApplicationRecord
     Event.create_event(verb: :reopen, object: self, changed_attribute: changed_attribute)
   end
 
-  around_update :add_event_after_recover_todo
-  def add_event_after_recover_todo
+  around_update :add_event_after_recover
+  def add_event_after_recover
     yield
     changed_attribute = {
       name: :deleted_at,
@@ -97,8 +97,8 @@ class Todo < ApplicationRecord
     Event.create_event(verb: :recover, object: self, changed_attribute: changed_attribute)
   end
 
-  around_update :add_event_after_destroy_todo
-  def add_event_after_destroy_todo
+  around_update :add_event_after_destroy
+  def add_event_after_destroy
     yield
     changed_attribute = {
       name: :deleted_at,

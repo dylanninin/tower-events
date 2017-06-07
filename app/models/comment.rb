@@ -1,15 +1,25 @@
 class Comment < ApplicationRecord
-  include Eventable
-  eventablize_serializer_attrs :text
-  eventablize_ops_context :create, verb: :reply
-  eventablize_ops_context :destroy
-
   belongs_to :commentable, polymorphic: true
   belongs_to :team
   belongs_to :creator, class_name: 'User'
 
   def replied_to
     Comment.find(replied_to_id) if replied_to_id.present?
+  end
+
+  after_create_commit :add_event_after_create
+  def add_event_after_create
+    Event.create_event(verb: :reply, object: self)
+  end
+
+  around_update :add_event_after_destroy
+  def add_event_after_destroy
+    Event.create_event(verb: :destroy, object: self)
+  end
+
+  # Serialized attrs for created event
+  def eventablize_serializer_attrs
+    %i(text)
   end
 
   # Default target for all events

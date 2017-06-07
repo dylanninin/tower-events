@@ -53,6 +53,19 @@ class Event < ApplicationRecord
       event.save
     end
 
+    # To partial event: json format
+    def as_partial_event(object)
+      return nil unless object.present?
+      m = :eventablize_serializer_attrs
+      keys = object.respond_to?(m) ? object.send(m) : []
+      keys.concat %i(id creator_id created_at updated_at)
+      json = object.as_json(only: keys)
+      json[:type] = object.class.name
+      # FIXME: Convert id to string, for gin index in PostgreSQL
+      json[:id] = object.id.to_s
+      json
+    end
+
     private
 
       # Audit object attribute if it has been changed
@@ -86,20 +99,9 @@ class Event < ApplicationRecord
 
         {
           :attribute => opts[:alias] || attr_name,
-          :old_value => opts[:value_proc] ? opts[:value_proc].call(change[0])&.as_partial_event : change[0],
-          :new_value => opts[:value_proc] ? opts[:value_proc].call(change[1])&.as_partial_event : change[1]
+          :old_value => opts[:value_proc] ? as_partial_event(opts[:value_proc].call(change[0])): change[0],
+          :new_value => opts[:value_proc] ? as_partial_event(opts[:value_proc].call(change[1])): change[1]
         }
-      end
-
-      # To partial event: json format
-      def as_partial_event(object)
-        return nil unless object.present?
-        keys = %i(id creator_id created_at updated_at)
-        json = object.as_json(only: keys)
-        json[:type] = object.class.name
-        # FIXME: Convert id to string, for gin index in PostgreSQL
-        json[:id] = object.id.to_s
-        json
       end
 
       # Get event partial: json format

@@ -1,9 +1,6 @@
 class User < ApplicationRecord
   has_secure_password
 
-  include Eventable
-  eventablize_serializer_attrs :name, :avatar
-
   # Thread scope: current_user
   def self.current
     Thread.current[:current_user]
@@ -11,5 +8,10 @@ class User < ApplicationRecord
 
   def self.current=(user)
     Thread.current[:current_user] = user
+  end
+
+  # Serialized attrs for created event
+  def eventablize_serializer_attrs
+    %i(name avatar)
   end
 end
