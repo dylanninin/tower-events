@@ -10,8 +10,8 @@ class User < ApplicationRecord
     Thread.current[:current_user] = user
   end
 
-  # Serialized attrs for created event
-  def eventablize_serializer_attrs
-    %i(name avatar)
+  # Serialize as partial event
+  def as_partial_event
+    as_json only: %i[name avatar]
   end
 end

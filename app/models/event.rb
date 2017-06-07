@@ -1,5 +1,6 @@
-class Event < ApplicationRecord
+# encoding: utf-8
 
+class Event < ApplicationRecord
   class << self
     # Find event by: pass norrmal model object
     # eg:
@@ -10,7 +11,7 @@ class Event < ApplicationRecord
     # => Event.find_by # return all events, same with Event.all
     def find_by(opts = {})
       ws = []
-      %i(actor object target generator provider).each do |s|
+      %i[actor object target generator provider].each do |s|
         i = opts[s]
         if i.present?
           ws << where("#{s}->'id' ? '#{i.id}' and #{s} -> 'type' ? '#{i.class.name}'")
@@ -23,11 +24,12 @@ class Event < ApplicationRecord
     # Create event with opts
     #
     # opts:
-    # actor：Symbol, optional. 指定 event.actor, 即当前操作者，默认为 :eventablize_actor
-    # verb: Symbol, optional. 指定 event.verb
-    # target：Symbol, optional. 指定 event.target
-    # provider: Symbol, optional. 指定 event.provider, 默认为 :eventablize_provider
-    # generator: Symbol, optional. 指定 event.generator, 默认为 :eventablize_generator
+    # actor：Object, required. 指定 event.actor, 即当前操作者
+    # verb: String, required, 指定 event.verb
+    # object: Object, required. 指定 event.object，即当前操作的首要对象
+    # target：Object, optional. 指定 event.target，即当前操作的目标对象
+    # provider: Object, optional. 指定 event.provider, 属于 Context
+    # generator: Object, optional. 指定 event.generator, 属于 Context
     # changed_attribute: Hash，因属性取值变化而产生的事件，如修改Todo的完成事件、完成者等
     # => name. 即要跟踪变化的属性.
     # => alias. 属性别名，若不指定默认为 name 取值。例如 name: :assignee_id, alias: :assignee，则在 audited[attribute] = :assignee
@@ -36,30 +38,26 @@ class Event < ApplicationRecord
     # => value_proc：Proc. 指定 event.object.audited 中 old|new_value 的求值 proc，若不指定默认为原始值
     def create_event(opts = {})
       object = opts[:object]
-      event = self.new
-      event.actor = event_partial(object, :actor, opts)
+      event = new
+      event.actor = as_partial_event opts[:actor]
       event.verb = opts[:verb]
       event.object = as_partial_event object
-      if opts[:changed_attribute].present?
-        audited = object_attribute_audited(object, opts[:changed_attribute])
-      else
-        audited = opts[:audited]
-      end
+      audited = object_attribute_audited(object, opts[:changed_attribute])
       event.object[:audited] = audited if audited.present? && event.object.present?
-      event.target = event_partial(object, :target, opts)
-      event.generator = event_partial(object, :generator, opts)
-      event.provider = event_partial(object, :provider, opts)
+      event.target = as_partial_event opts[:target]
+      event.provider = as_partial_event opts[:provider]
+      event.generator = as_partial_event opts[:generator]
       event.published = object.updated_at
       event.save
     end
 
     # To partial event: json format
+    # Object that as partial event should implement method :as_partial_event
+    # Or else, all attributes will be serialized
     def as_partial_event(object)
       return nil unless object.present?
-      m = :eventablize_serializer_attrs
-      keys = object.respond_to?(m) ? object.send(m) : []
-      keys.concat %i(id creator_id created_at updated_at)
-      json = object.as_json(only: keys)
+      json = object&.as_partial_event || object.as_json
+      # TODO: Attribute type should be reserved
       json[:type] = object.class.name
       # FIXME: Convert id to string, for gin index in PostgreSQL
       json[:id] = object.id.to_s
@@ -68,50 +66,40 @@ class Event < ApplicationRecord
 
     private
 
-      # Audit object attribute if it has been changed
-      # object: the current object being audited
-      #
-      # opts:
-      # name: required. the attribute to be audit
-      # alias: optional. the attribute alias name
-      # old_value?: optional. proc to check if the old value has satisfied the condition
-      # new_value?: optional. proc to check if the new value has satisfied the condition
-      # value_proc: optional. proc to re-evaluate the old|new value after it has satisfied the condition
-      def object_attribute_audited(object, opts = {})
-        return nil unless opts.present?
+    # Audit object attribute if it has been changed
+    # object: the current object being audited
+    #
+    # opts:
+    # name: required. the attribute to be audit
+    # alias: optional. the attribute alias name
+    # old_value?: optional. proc to check if the old value has satisfied the condition
+    # new_value?: optional. proc to check if the new value has satisfied the condition
+    # value_proc: optional. proc to re-evaluate the old|new value after it has satisfied the condition
+    def object_attribute_audited(object, opts = {})
+      return nil unless opts.present?
 
-        attr_name = opts[:name]
-        return nil unless attr_name.present?
+      attr_name = opts[:name]
+      return nil unless attr_name.present?
 
-        change = object.send(:"#{attr_name}_change")
-        return nil unless change.present?
+      change = object.send(:"#{attr_name}_change")
+      return nil unless change.present?
 
-        need_audit = true
-        %i(old_value? new_value?).each_with_index do |v, i|
-          c = opts[v]
-          next if c.blank?
-          unless c.call(change[i])
-            need_audit = false
-            break
-          end
+      need_audit = true
+      %i[old_value? new_value?].each_with_index do |v, i|
+        c = opts[v]
+        next if c.blank?
+        unless c.call(change[i])
+          need_audit = false
+          break
         end
-        return nil unless need_audit
-
-        {
-          :attribute => opts[:alias] || attr_name,
-          :old_value => opts[:value_proc] ? as_partial_event(opts[:value_proc].call(change[0])): change[0],
-          :new_value => opts[:value_proc] ? as_partial_event(opts[:value_proc].call(change[1])): change[1]
-        }
       end
+      return nil unless need_audit
 
-      # Get event partial: json format
-      def event_partial(object, symbol, opts, default=nil)
-        m = opts[symbol] || :"eventablize_#{symbol}"
-        if object.respond_to? m
-          partial = object.send m
-        end
-        as_partial_event partial || default
-      end
-
+      {
+        attribute: opts[:alias] || attr_name,
+        old_value: opts[:value_proc] ? as_partial_event(opts[:value_proc].call(change[0])) : change[0],
+        new_value: opts[:value_proc] ? as_partial_event(opts[:value_proc].call(change[1])) : change[1]
+      }
+    end
   end
 end

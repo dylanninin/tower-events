@@ -7,28 +7,25 @@ class Comment < ApplicationRecord
     Comment.find(replied_to_id) if replied_to_id.present?
   end
 
+  # Serialize as partial event
+  def as_partial_event
+    as_json only: %i[text]
+  end
+
   after_create_commit :add_event_after_create
   def add_event_after_create
-    Event.create_event(verb: :reply, object: self)
+    Event.create_event actor: User.current, verb: :reply, object: self,
+                       target: commentable, provider: provider, generator: team
   end
 
   around_update :add_event_after_destroy
   def add_event_after_destroy
-    Event.create_event(verb: :destroy, object: self)
-  end
-
-  # Serialized attrs for created event
-  def eventablize_serializer_attrs
-    %i(text)
-  end
-
-  # Default target for all events
-  def eventablize_target
-    commentable
+    Event.create_event actor: User.current, verb: :destroy, object: self,
+                       provider: provider, generator: team
   end
 
   # Default provider for all events
-  def eventablize_provider
+  def provider
     case commentable_type
     when 'Todo'
       provider = commentable.project
@@ -37,13 +34,8 @@ class Comment < ApplicationRecord
     when 'Report'
       provider = commentable
     else
-      raise ArgumentError.new("unknown commentable_type: #{object.commentable_type}")
+      raise ArgumentError, "unknown commentable_type: #{object.commentable_type}"
     end
     provider
-  end
-
-  # Default generator for all events
-  def eventablize_generator
-    team
   end
 end

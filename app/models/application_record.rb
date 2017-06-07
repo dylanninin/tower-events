@@ -7,18 +7,13 @@ class ApplicationRecord < ActiveRecord::Base
   # So, re-invent it by update attributes
   def soft_delete
     self.deleted_at = Time.now
-    self.save
+    save
   end
-  alias_method :destroy, :soft_delete
+  alias destroy soft_delete
 
   scope :with_deleted, -> { unscope where: :deleted_at }
 
   def deleted?
     deleted_at.present?
-  end
-
-  # Event default actor, see User.current
-  def eventablize_actor
-    User.current
   end
 end
