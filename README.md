@@ -41,25 +41,25 @@ event 可以抽象为：`[someone] [did an action] [on|with an object] [to|again
 # Implementation
 
 主要利用 `rails` 提供的机制：
-- `callbacks`:  实现生成 `event` 的 同步回调
-- `concerns`：DRY，减少重复代码；并尝试将 `event` 抽象成 DSL，降低代码入侵与耦合
+- `callbacks`:  实现生成 `event` 的同步回调
 
-`Eventable` 设计
-- 旨在提供配置 `event` 的唯一的入口，提供定制化参数，实现可插拔的 `event`
-- `eventablize_serializer_attrs`：即要序列化的属性列表
-- `eventablize_ops_context`
-  - context: Symbol. 主要是 :create, :destroy, :update
-  - verb: Symbol. 指定 event.verb，默认同 context.
-  - target：Symbol. 指定 event.target
-  - provider: Symbol. 默认为 `:eventablize_provider`
-  - generator: Symbol. 默认为 `:eventablize_generator`
-  - actor: Symbol. 即当前操作者，默认直接从 User.current 中获取，为 Thread.current 变量
-  - attr：Symbol. 即要跟踪变化的属性.
-  - attr_alias：Symbol. 属性别名，若不指定默认为 `attr` 取值。例如 `attr: :assignee_id`, `attr_alias: :assignee`，则在 `audited[attribute] = :assignee`
-  - value_proc：Proc. 指定 event.object.audited 中 `old|new_value` 的求值 `proc`，若不指定默认为原始值
-  - old_value?：Proc. 指定数据属性取值变化时，旧的取值是否满足当前 `verb` 的要求。如 `open`|`reopen`|`complete` 等动作均是对 `Todo.status` 属性操作，此时需要验证以作区分。
-  - new_value?：Proc. 指定数据属性取值变化时，新的取值是否满足当前 `verb` 的要求。如 `open`|`reopen`|`complete` 等动作均是对 `Todo.status` 属性操作，此时需要验证以作区分。
-- `as_partial_event`：即序列化成 `event` 属性的方法，使用 `as_json` 方法，序列化的属性包括 `eventablize_serializer_attrs` + `[:id, :type, :creator_id, :created_at, :updated_at]`
+`Event` model 设计
+- 旨在提供生成 `event` 的唯一的入口，提供定制化参数，实现可插拔的 `event`
+- `create_event`: 即创建 `event` 的统一入口
+  - `actor`：Object, required. 指定 event.actor, 即当前操作者
+  - `verb`: String, required, 指定 event.verb
+  - `object`: Object, required. 指定 event.object，即当前操作的首要对象
+  - `target`：Object, optional. 指定 event.target，即当前操作的目标对象
+  - `provider`: Object, optional. 指定 event.provider, 属于 Context
+  - `generator`: Object, optional. 指定 event.generator, 属于 Context
+  - `changed_attribute`: Hash，因属性取值变化而产生的事件，如修改Todo的完成事件、完成者等
+    - => `name`. 即要跟踪变化的属性.
+    - => `alias`. 属性别名，若不指定默认为 name 取值。例如 name: :assignee_id, alias: :assignee，则在 audited[attribute] = :assignee
+    - => `old_value?`：Proc. 指定数据属性取值变化时，旧的取值是否满足当前 verb 的要求。如 open|reopen|complete 等动作均是对 Todo.status 属性操作，此时需要验证以作区分。
+    - => `new_value?`：Proc. 指定数据属性取值变化时，新的取值是否满足当前 verb 的要求。如 open|reopen|complete 等动作均是对 Todo.status 属性操作，此时需要验证以作区分。
+    - => `value_proc`：Proc. 指定 event.object.audited 中 old|new_value 的求值 proc，若不指定默认为原始
+- `as_partial_event`：即将上述 Object 序列化成 `event` 属性的方法，使用 `as_json` 方法
+- `find_by`：提供事件的查询方法
 
 以 `Todo` 为例，没有 `events` 动态之前：
 ```ruby
@@ -74,23 +74,9 @@ class Todo < ApplicationRecord
 end
 ```
 
-要增加 `创建`、`完成` 等`events`动态，需要 `include Eventable`，并：
+要增加 `创建`、`设置完成者` 等`events`动态，需要创建 callback，并调用 `Event.create_event` 方法即可，代码如下：
 ```ruby
 class Todo < ApplicationRecord
-  include Eventable
-  eventablize_serializer_attrs :name
-  eventablize_ops_context :create
-  eventablize_ops_context :destroy
-  # FIXME: For consistency, set_due rename to set_due_to
-  eventablize_ops_context :update, verb: :set_due_to, attr: :due_to
-  eventablize_ops_context :update, verb: :assign, target: :assignee, attr: :assignee_id, attr_alias: :assignee, value_proc: -> (v) { User.where(id: v).first }, old_value?: -> (v) { v.nil? }, new_value?: -> (v) { v.present? }
-  eventablize_ops_context :update, verb: :reassign, target: :assignee, attr: :assignee_id, attr_alias: :assignee, value_proc: -> (v) { User.where(id: v).first }, old_value?: -> (v) { v.present? }, new_value?: -> (v) { v.present? }
-  eventablize_ops_context :update, verb: :run, attr: :status, new_value?: -> (v) { v == 'running' }
-  eventablize_ops_context :update, verb: :pause, attr: :status, new_value?: -> (v) { v == 'paused' }
-  eventablize_ops_context :update, verb: :complete, attr: :status, new_value?: -> (v) { v == 'completed' }
-  eventablize_ops_context :update, verb: :reopen, attr: :status, old_value?: -> (v) { v == 'completed' },  new_value?: -> (v) { v == 'open' }
-  eventablize_ops_context :update, verb: :recover, attr: :deleted_at, old_value?: -> (v) { v.present? },  new_value?: -> (v) { v.nil? }
-
   enum status: { open: 0, running: 1, paused: 2, completed: 3 }
 
   belongs_to :assignee, class_name: 'User', optional: true
@@ -99,17 +85,38 @@ class Todo < ApplicationRecord
   belongs_to :team
   belongs_to :creator, class_name: 'User'
 
-  # Default provider for all events
-  def eventablize_provider
-    project
+  after_create_commit :add_event_after_create
+  def add_event_after_create
+    Event.create_event actor: User.current, verb: :create, object: self,
+                       provider: project, generator: team
   end
 
-  # Default generator for all events
-  def eventablize_generator
-    team
+  around_update :add_event_after_assign
+  def add_event_after_assign
+    yield
+    changed_attribute = {
+      name: :assignee_id,
+      alias: :assignee,
+      old_value?: ->(v) { v.nil? },
+      value_proc: ->(v) { User.where(id: v).first }
+    }
+    Event.create_event actor: User.current, verb: :assign, object: self,
+                       target: assignee, changed_attribute: changed_attribute,
+                       provider: project, generator: team
   end
 end
+```
 
+特别地，创建事件时，`todo` 会默认调用 `as_json` 方法序列化全部属性；若想定制，定义 `as_partial_event` 方法即可，如下：
+
+```ruby
+class Todo < ApplicationRecord
+  # ...
+  # Serialize as partial event
+  def as_partial_event
+    as_json only: %i[name], include: { creator: { only: %i[:id name avatar] }}
+  end
+  # ...
 ```
 
 不足之处
@@ -117,8 +124,8 @@ end
 - 对比 `assignee`,`set_due_to`(即 `audited`）的设计、实现，其实与其他 `verb` 很不一致，之前的考虑见  https://github.com/dylanninin/tower-events/issues/2#issuecomment-305469983   
 
 源代码
-- `Eventable`: [app/models/concerns/eventable.rb](app/models/concerns/eventable.rb)
 - `Event`: [app/models/event.rb](app/models/event.rb)
+- `Todo`: [app/models/todo.rb](app/models/todo.rb)
 
 主要变更历史
 - `destroy`：数据库使用 `paranoid` 实现 soft delete，但其内部的实现为 `update_columns`，不会触发 `callback`，故采用 `update_attributes` 的方式实现

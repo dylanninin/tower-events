@@ -1,19 +1,21 @@
 class Calendar < ApplicationRecord
-  include Eventable
-  eventablize_serializer_attrs :name
-  eventablize_ops_context :create
-  eventablize_ops_context :destroy
-
   belongs_to :team
   belongs_to :creator, class_name: 'User'
 
-  # Default provider for all events
-  def eventablize_provider
-    self
+  # Serialize as partial event
+  def as_partial_event
+    as_json only: %i(name)
   end
 
-  # Default generator for all events
-  def eventablize_generator
-    team
+  after_create_commit :add_event_after_create
+  def add_event_after_create
+    Event.create_event actor: User.current, verb: :create, object: self,
+    provider: team, generator: team
+  end
+
+  around_update :add_event_after_destroy
+  def add_event_after_destroy
+    Event.create_event actor: User.current, verb: :destroy, object: self,
+    provider: team, generator: team, attrs
   end
 end
