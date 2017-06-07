@@ -16,6 +16,6 @@ class Calendar < ApplicationRecord
   around_update :add_event_after_destroy
   def add_event_after_destroy
     Event.create_event actor: User.current, verb: :destroy, object: self,
-    provider: team, generator: team, attrs
+    provider: team, generator: team
   end
 end
