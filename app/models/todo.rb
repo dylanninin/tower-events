@@ -1,6 +1,4 @@
 class Todo < ApplicationRecord
-  include Eventable
-  eventablize_serializer_attrs :name
 
   enum status: { open: 0, running: 1, paused: 2, completed: 3 }
 
@@ -108,6 +106,10 @@ class Todo < ApplicationRecord
       new_value?: -> (v) { v.present? }
     }
     Event.create_event(verb: :destroy, object: self, changed_attribute: changed_attribute)
+  end
+
+  def eventablize_serializer_attrs
+    %i(name)
   end
 
   # Default provider for all events
