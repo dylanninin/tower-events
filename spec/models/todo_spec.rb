@@ -200,6 +200,10 @@ RSpec.describe Todo, type: :model do
 
       expect(e.provider['type']).to eq 'Project'
       expect(e.provider['id'].to_i).to eq t.project.id
+
+      # User A reassign Todo T created by User B from User C to User D
+      expect(e.object['creator']).not_to be_nil
+      expect(e.actor['id']).not_to eq expect(e.object['creator']['id'])
     end
 
     it 'set_due_to' do

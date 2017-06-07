@@ -9,7 +9,7 @@ class Todo < ApplicationRecord
 
   # Serialize as partial event
   def as_partial_event
-    as_json only: %i[name]
+    as_json only: %i[name], include: { creator: { only: %i[:id name avatar] }}
   end
 
   after_create_commit :add_event_after_create
