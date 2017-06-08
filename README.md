@@ -211,4 +211,10 @@ online: https://awesome-tower-events.herokuapp.com/
 
 # One more thing
 
-TODO
+review history
+- 实现过于复杂，代码不好读懂
+- model 层要『轻量』，只负责属性的读取和存储
+- 创建 event 属于 业务层，不应该是 model 层负责；可以放在 controller 或 service 层
+- 参考 [public-activity](https://github.com/chaps-io/public_activity)
+
+result: failed this test
