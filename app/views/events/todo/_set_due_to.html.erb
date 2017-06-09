@@ -1,0 +1,3 @@
+<div class="event-title">
+  <%= event.verb %> from <%= event.parameters['old_value'] %> to <%= event.parameters['new_value'] %>: <a href="/<%= event.object['type'].underscore.pluralize %>/<%= event.object['id'] %>"><%= event.object['name'] %></a>
+</div>

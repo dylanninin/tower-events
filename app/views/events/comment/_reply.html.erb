@@ -1,0 +1,6 @@
+<div class="event-title">
+  <%= event.verb %> to <%= event.target['type'] %>: <a href="/<%= event.target['type'].underscore.pluralize %>/<%= event.target['id'] %>"><%= event.target['name'] %></a>
+</div>
+<div class="event-content">
+  <a href="/<%= event.object['type'].underscore.pluralize %>/<%= event.object['id'] %>"><%= event.object['text'] %></a>
+</div>

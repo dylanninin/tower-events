@@ -1,6 +1,9 @@
 class User < ApplicationRecord
   has_secure_password
 
+  include Eventable
+  eventablize_opts as_json: { only: %i[name avatar] }
+
   # Thread scope: current_user
   def self.current
     Thread.current[:current_user]
@@ -8,10 +11,5 @@ class User < ApplicationRecord
 
   def self.current=(user)
     Thread.current[:current_user] = user
-  end
-
-  # Serialize as partial event
-  def as_partial_event
-    as_json only: %i[name avatar]
   end
 end

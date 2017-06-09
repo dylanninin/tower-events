@@ -161,8 +161,8 @@ RSpec.describe Todo, type: :model do
       expect(e.object['type']).to eq 'Todo'
       expect(e.object['id'].to_i).to eq t.id
 
-      audited = { attribute: 'assignee', old_value: nil, new_value: Event.as_partial_event(new_value) }
-      expect(e.object['audited']).to eq audited.as_json
+      parameters = { attribute: 'assignee', old_value: nil, new_value: new_value.as_partial_event }
+      expect(e.parameters).to eq parameters.as_json
 
       expect(e.target['type']).to eq 'User'
       expect(e.target['id'].to_i).to eq new_value.id
@@ -189,8 +189,8 @@ RSpec.describe Todo, type: :model do
       expect(e.object['type']).to eq 'Todo'
       expect(e.object['id'].to_i).to eq t.id
 
-      audited = { attribute: 'assignee', old_value: Event.as_partial_event(old_value), new_value: Event.as_partial_event(new_value) }
-      expect(e.object['audited']).to eq audited.as_json
+      parameters = { attribute: 'assignee', old_value: old_value.as_partial_event, new_value: new_value.as_partial_event }
+      expect(e.parameters).to eq parameters.as_json
 
       expect(e.target['type']).to eq 'User'
       expect(e.target['id'].to_i).to eq new_value.id
@@ -200,10 +200,6 @@ RSpec.describe Todo, type: :model do
 
       expect(e.provider['type']).to eq 'Project'
       expect(e.provider['id'].to_i).to eq t.project.id
-
-      # User A reassign Todo T created by User B from User C to User D
-      expect(e.object['creator']).not_to be_nil
-      expect(e.actor['id']).not_to eq expect(e.object['creator']['id'])
     end
 
     it 'set_due_to' do
@@ -221,8 +217,8 @@ RSpec.describe Todo, type: :model do
       expect(e.object['type']).to eq 'Todo'
       expect(e.object['id'].to_i).to eq t.id
 
-      audited = { attribute: 'due_to', old_value: old_value, new_value: new_value }
-      expect(e.object['audited']).to eq audited.as_json
+      parameters = { attribute: 'due_to', old_value: old_value, new_value: new_value }
+      expect(e.parameters).to eq parameters.as_json
 
       expect(e.target).to be_nil
 
