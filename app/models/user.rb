@@ -2,7 +2,7 @@ class User < ApplicationRecord
   has_secure_password
 
   include Eventable
-  eventablize_serializer_attrs :name, :avatar
+  eventablize_opts as_json: { only: [:name, :avatar] }
 
   # Thread scope: current_user
   def self.current

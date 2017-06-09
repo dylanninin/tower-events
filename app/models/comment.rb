@@ -1,8 +1,11 @@
 class Comment < ApplicationRecord
   include Eventable
-  eventablize_serializer_attrs :text
-  eventablize_ops_context :create, verb: :reply
-  eventablize_ops_context :destroy
+  eventablize_opts actor: Proc.new { User.current }, target: :commentable, provider: :provider, generator: :team,
+                   as_json: {
+                     only: [:text]
+                   }
+  eventablize_on :create, verb: :reply
+  eventablize_on :destroy
 
   belongs_to :commentable, polymorphic: true
   belongs_to :team
@@ -12,28 +15,15 @@ class Comment < ApplicationRecord
     Comment.find(replied_to_id) if replied_to_id.present?
   end
 
-  # Default target for all events
-  def eventablize_target
-    commentable
-  end
-
   # Default provider for all events
-  def eventablize_provider
+  def provider
     case commentable_type
     when 'Todo'
-      provider = commentable.project
+      commentable.project
     when 'CalendarEvent'
-      provider = commentable.calendarable
+      commentable.calendarable
     when 'Report'
-      provider = commentable
-    else
-      raise ArgumentError.new("unknown commentable_type: #{object.commentable_type}")
+      commentable
     end
-    provider
-  end
-
-  # Default generator for all events
-  def eventablize_generator
-    team
   end
 end

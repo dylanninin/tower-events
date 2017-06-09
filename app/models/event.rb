@@ -21,80 +21,43 @@ class Event < ApplicationRecord
     end
 
     # Create event
+    # opts:
+    # actor：Object, required. 指定 event.actor, 即当前操作者
+    # verb: String, required, 指定 event.verb
+    # object: Object, required. 指定 event.object，即当前操作的首要对象
+    # target：Object, optional. 指定 event.target，即当前操作的目标对象
+    # provider: Object, optional. 指定 event.provider, 属于 Context
+    # generator: Object, optional. 指定 event.generator, 属于 Context
+    # audited: Hash，因属性取值变化而产生的事件，如修改Todo的完成事件、完成者等
+    # => attribute. 即要跟踪变化的属性.
+    # => old_value. 指定数据属性旧的取值
+    # => new_value. 指定数据属性新的取值
     def create_event(opts = {})
       object = opts[:object]
       event = self.new
-      event.actor = event_partial(object, :actor, opts, event_default_actor)
+      event.actor = resolve_value object, opts[:actor]
       event.verb = opts[:verb]
-      event.object = object&.as_partial_event
+      event.object = resolve_value object, :self
       event.object[:audited] = opts[:audited] if opts[:audited].present? && event.object.present?
-      event.target = event_partial(object, :target, opts)
-      event.generator = event_partial(object, :generator, opts)
-      event.provider = event_partial(object, :provider, opts)
+      event.target = resolve_value object, opts[:target]
+      event.generator = resolve_value object, opts[:generator]
+      event.provider = resolve_value object, opts[:provider]
       event.published = object.updated_at
       event.save
     end
 
-    def event_partial(object, symbol, opts, default=nil)
-      m = opts[symbol] || :"eventablize_#{symbol}"
-      partial = default
-      if object.respond_to? m
-        partial = object.send m
+    def resolve_value(context, thing)
+      value = nil
+      case thing
+      when :self
+        value = context
+      when Symbol
+        value = context.send thing
+      when Proc
+        value = thing.call(context)
       end
-      partial&.as_partial_event
+      value&.as_partial_event
     end
 
-    # Default user, see User.current
-    def event_default_actor
-      User.current
-    end
   end
-
-  # TODO: Title can be removed
-  # For flexibility, title has not been persisted
-  def title
-    words = []
-    words << actor['name']
-    case verb
-    when 'create', 'destroy', 'run', 'pause', 'complete', 'reopen', 'recover'
-      words << verb
-      words << object['type']
-      words << ':'
-      words << object['name']
-    when 'set_due_to'
-      words << verb
-      words << "from #{object['audited']['old_value']}"
-      words << "to #{object['audited']['new_value']}"
-      words << ':'
-      words << object['name']
-    when 'assign'
-      words << verb
-      words << target['name']
-      words << ":"
-      words << object['name']
-    when 'reassign'
-      words << object['audited']['old_value']['name']
-      words << object['type']
-      words << 'to'
-      words << object['audited']['new_value']['name']
-      words << ':'
-      words << object['name']
-    when 'reply'
-      words << verb
-      words << target['type']
-      words << ':'
-      words << target['name']
-    end
-    words.join(' ')
-  end
-
-  # TODO: Content can be removed
-  # For flexibility, content has not been persisted
-  def content
-    case verb
-    when 'reply'
-      object['text']
-    end
-  end
-
 end

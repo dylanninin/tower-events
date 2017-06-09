@@ -1,21 +1,14 @@
 class CalendarEvent < ApplicationRecord
   include Eventable
-  eventablize_serializer_attrs :name
-  eventablize_ops_context :create
-  eventablize_ops_context :update, verb: :edit
-  eventablize_ops_context :destroy
+  eventablize_opts actor: Proc.new { User.current }, provider: :calendarable, team: :team,
+                   as_json: {
+                     only: [:name]
+                   }
+  eventablize_on :create
+  eventablize_on :update, verb: :edit
+  eventablize_on :destroy
 
   belongs_to :calendarable, polymorphic: true
   belongs_to :team
   belongs_to :creator, class_name: 'User'
-
-  # Default generator for all events
-  def eventablize_generator
-    team
-  end
-
-  # Default provider for all events
-  def eventablize_provider
-    calendarable
-  end
 end
