@@ -1,3 +1,3 @@
 <div class="event-title">
-  <%= event.verb %> <%= event.object['type'] %>'s from <%= event.object['audited']['old_value'] %> to <%= event.object['audited']['new_value'] %>: <a href="/<%= event.object['type'].underscore.pluralize %>/<%= event.object['id'] %>"><%= event.object['name'] %></a>
+  <%= event.verb %> <%= event.object['type'] %>'s from <%= event.parameters['old_value'] %> to <%= event.parameters['new_value'] %>: <a href="/<%= event.object['type'].underscore.pluralize %>/<%= event.object['id'] %>"><%= event.object['name'] %></a>
 </div>

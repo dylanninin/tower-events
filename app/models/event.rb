@@ -28,17 +28,14 @@ class Event < ApplicationRecord
     # target：Object, optional. 指定 event.target，即当前操作的目标对象
     # provider: Object, optional. 指定 event.provider, 属于 Context
     # generator: Object, optional. 指定 event.generator, 属于 Context
-    # audited: Hash，因属性取值变化而产生的事件，如修改Todo的完成事件、完成者等
-    # => attribute. 即要跟踪变化的属性.
-    # => old_value. 指定数据属性旧的取值
-    # => new_value. 指定数据属性新的取值
+    # parameters: Hash, optional. 指定 event.paramters.
     def create_event(opts = {})
       object = opts[:object]
       event = self.new
       event.actor = resolve_value object, opts[:actor]
       event.verb = opts[:verb]
       event.object = resolve_value object, :self
-      event.object[:audited] = opts[:audited] if opts[:audited].present? && event.object.present?
+      event.parameters = resolve_value object, opts[:parameters]
       event.target = resolve_value object, opts[:target]
       event.generator = resolve_value object, opts[:generator]
       event.provider = resolve_value object, opts[:provider]
@@ -55,8 +52,14 @@ class Event < ApplicationRecord
         value = context.send thing
       when Proc
         value = thing.call(context)
+      else
+        value = thing
       end
-      value&.as_partial_event
+      if value.respond_to? :as_partial_event
+        value.as_partial_event
+      else
+        value
+      end
     end
 
   end

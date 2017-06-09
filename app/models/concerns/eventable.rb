@@ -58,12 +58,12 @@ module Eventable
 
         # Generate event
         # FIXME: Get referenced object by field like 'assignee_id'
-        # => attr_alias is an alias for audited attr
+        # => attr_alias is an alias for attr
         # => value_proc is the proc to get value of the attr
-        opts[:audited] = {
+        opts[:parameters] = {
           :attribute => opts[:attr_alias] || k,
-          :old_value => opts[:value_proc] ? opts[:value_proc].call(change[0])&.as_partial_event : change[0],
-          :new_value => opts[:value_proc] ? opts[:value_proc].call(change[1])&.as_partial_event : change[1]
+          :old_value => Event.resolve_value(change[0], opts[:value_proc] || :self),
+          :new_value => Event.resolve_value(change[1], opts[:value_proc] || :self),
         }
         opts[:object] = self
         Event.create_event(**opts)
@@ -104,10 +104,10 @@ module Eventable
     # provider: Object|Symbol|Proc, optional. 指定 event.provider, 属于 Context
     # generator: Object|Symbol|Proc, optional. 指定 event.generator, 属于 Context
     # attr: 即要跟踪变化的属性.
-    # attr_alias. 属性别名，若不指定默认为 attr 取值。例如 attr: :assignee_id, alias: :assignee，则在 audited[attribute] = :assignee
+    # attr_alias. 属性别名，若不指定默认为 attr 取值。例如 attr: :assignee_id, alias: :assignee，则在 event.parameters[attribute] = :assignee
     # old_value?：Proc. 指定数据属性取值变化时，旧的取值是否满足当前 verb 的要求。如 open|reopen|complete 等动作均是对 Todo.status 属性操作，此时需要验证以作区分。
     # new_value?：Proc. 指定数据属性取值变化时，新的取值是否满足当前 verb 的要求。如 open|reopen|complete 等动作均是对 Todo.status 属性操作，此时需要验证以作区分。
-    # value_proc：Proc. 指定 event.object.audited 中 old|new_value 的求值 proc，若不指定默认为原始值
+    # value_proc：Proc. 指定 event.parameters 中 old|new_value 的求值 proc，若不指定默认为原始值
     def eventablize_on(ctx, opts = {})
       raise ArgumentError, "unsupported context: #{ctx}" unless AVALIABLE_OPS_CONTEXT_SCOPE.include? ctx
 
@@ -140,7 +140,7 @@ module Eventable
 
     # For soft delete
     def eventablize_on_soft_delete
-      opts = { verb: :destroy, attr: :deleted_at, old_value: -> (v) { v.nil? },  new_value: -> (v) { v.present? } }
+      opts = { verb: :destroy, attr: :deleted_at, old_value?: -> (v) { v.nil? },  new_value?: -> (v) { v.present? } }
       eventablize_on_attrs_changed(**opts)
     end
   end
