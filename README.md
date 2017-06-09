@@ -9,20 +9,21 @@ Events System of Tower.im
 
 event 可以抽象为：`[someone] [did an action] [on|with an object] [to|against a target] [at a time] [within some contexts]`
 
-- actor：即 [someone]，产生该事件的主体，可以是任意实体；一般为用户
-- verb：即 [did an action]，描述该事件的具体动作，如 `create`, `assign`, `reply` 等
-- object：即 [on|with an object]，描述该事件的首要对象，比如 `someone created a todo` 中的 `a todo`, `someone assigned a todo to an assignee` 中的 `a todo`
-- target：即 `[to|against a target]`，描述该事件的目标对象，可根据具体的 `verb` 进行解释，如 `someone assigned a todo to an assignee` 中的 `an assignee`, `someone replied a comment to a todo` 中的 `todo`
-- `provider`：即产生该事件的应用上下文，可选。例如，以上 `event` 均是用户在某一个 `team` 下生成的，属于所有 `team` 成员共有，此时 `generator` 为该 `team`
-- `generator`：即发布该事件的应用上下文，根据 `object + target` 确定，可选。例如，以上某些 `event` 是用户在某一个 `context` 下生成的，比如 `todo/comment` 等从属于 `project` 时，此时 `provider` 为 `project`
-- `published`：即 `[at a time]`，描述该事件产生的时间。
+- `actor`：即 [someone]，产生该事件的主体，可以是任意实体；一般为用户；必须。
+- `verb`：即 [did an action]，描述该事件的具体动作，如 `team.create`, `todo.assign`, `comment.reply` 等；必须。
+- `object`：即 [on|with an object]，描述该事件的首要对象，比如 `someone created a todo` 中的 `a todo`, `someone assigned a todo to an assignee` 中的 `a todo`；必须。
+- `target`：即 `[to|against a target]`，描述该事件的目标对象，可根据具体的 `verb` 进行解释，如 `someone assigned a todo to an assignee` 中的 `an assignee`, `someone replied a comment to a todo` 中的 `todo`；可选。
+- `provider`：即发布该事件的应用上下文，根据 `object + target` 确定，可选。例如，以上某些 `event` 是用户在某一个 `context` 下生成的，比如 `todo/comment` 等从属于 `project` 时，此时 `provider` 为 `project`。
+- `generator`：即产生该事件的应用上下文，可选。例如，以上 `event` 均是用户在某一个 `team` 下生成的，属于所有 `team` 成员共有，此时 `generator` 为该 `team`；可选。
+- `published`：即 `[at a time]`，描述该事件产生的时间，必须。
 - `title`：即该事件的字面标题，一般根据 `actor + verb + object + target + published` 组成，可以灵活展示；可选。
 - `content`：即该事件的具体内容，一般根据 `object + target` 组成，可以灵活展示；可选。
+- `parameters`：即该事件的参数，可自定义，可选。
 
-针对修改 `model` 中的某些字段，同时带有重要语义的情况，如 `assign a todo to someone`, `change the due_to of a todo`等等，抽象处理成更新 `object`，在 `object` 中增加字段 `audited` 来标记这种变更。如下：`audited` 单独封装成一个 `hash`，event[object][audited] 如：
+针对修改 `model` 中的某些字段，同时带有重要语义的情况，如 `assign a todo to someone`, `change the due_to of a todo`等等，抽象处理成更新 `object`，在 `event` 中增加字段 `parameters` 来标记这种变更，如：
 
 ```ruby
-"audited": {
+"parameters": {
 "attribute": "due_to",
 "old_value": nil,
 "new_value": "2017-06-03"
@@ -33,6 +34,8 @@ event 可以抽象为：`[someone] [did an action] [on|with an object] [to|again
 - `audited`: 原先为 `event[object][audited_attribute]`, `event[object][old_value]`, `event[object][new_value]`，现在统一封装到 `audited` 中
 - `published`: 最初时间的创建时间使用 `created_at` 字段，但与一般数据库记录的创建时间冲突，语义上不等价；另外，在异步创建时间时，两者相差更远。故增加 `published` 字段
 - `title`, `content`: 可以移除掉，暂无处理。
+- `parameters`: 原 `audited` 抽取为 `parameters`
+- `verb` 增加前缀： 根据 `object`，增加相应的前缀，以 `todo` 为例，`create -> todo.create`
 
 参考
 - [#2 系统设计](https://github.com/dylanninin/tower-events/issues/2)
@@ -61,10 +64,10 @@ event 可以抽象为：`[someone] [did an action] [on|with an object] [to|again
   - provider: Object|Symbol|Proc, optional. 指定 event.provider, 属于 Context
   - generator: Object|Symbol|Proc, optional. 指定 event.generator, 属于 Context
   - attr: 即要跟踪变化的属性.
-  - attr_alias. 属性别名，若不指定默认为 attr 取值。例如 attr: :assignee_id, alias: :assignee，则在 audited[attribute] = :assignee
+  - attr_alias. 属性别名，若不指定默认为 attr 取值。例如 attr: :assignee_id, alias: :assignee，则在 parameters[attribute] = :assignee
   - old_value?：Proc. 指定数据属性取值变化时，旧的取值是否满足当前 verb 的要求。如 open|reopen|complete 等动作均是对 Todo.status 属性操作，此时需要验证以作区分。
   - new_value?：Proc. 指定数据属性取值变化时，新的取值是否满足当前 verb 的要求。如 open|reopen|complete 等动作均是对 Todo.status 属性操作，此时需要验证以作区分。
-  - value_proc：Proc. 指定 event.object.audited 中 old|new_value 的求值 proc，若不指定默认为原始值
+  - value_proc：Proc. 指定 event.parameters 中 old|new_value 的求值 proc，若不指定默认为原始值
 
 以 `Todo` 为例，没有 `events` 动态之前：
 ```ruby
@@ -113,7 +116,7 @@ end
 
 不足之处
 - 实现受限于 `rails` 的 callback 机制
-- 对比 `assignee`,`set_due_to`(即 `audited`）的设计、实现，其实与其他 `verb` 很不一致，之前的考虑见  https://github.com/dylanninin/tower-events/issues/2#issuecomment-305469983   
+- 对比 `assignee`,`set_due_to`(即 `parameters`）的设计、实现，其实与其他 `verb` 很不一致，之前的考虑见  https://github.com/dylanninin/tower-events/issues/2#issuecomment-305469983   
 
 源代码
 - `Eventable`: [app/models/concerns/eventable.rb](app/models/concerns/eventable.rb)
@@ -121,20 +124,20 @@ end
 
 主要变更历史
 - `destroy`：数据库使用 `paranoid` 实现 soft delete，但其内部的实现为 `update_columns`，不会触发 `callback`，故采用 `update_attributes` 的方式实现
-- 在 `audited` 中需要获取引用对象，而非 `id` 值。如 `todo.assignee`，受限于 `rails` 的 `change` 机制，默认保存的 `audited` 信息如下：
+- 在 `parameters` 中需要获取引用对象，而非 `id` 值。如 `todo.assignee`，受限于 `rails` 的 `change` 机制，默认保存的 `parameters` 信息如下：
 
   ```ruby
-  "audited": {
+  "parameters": {
   "attribute": "assignee_id",
   "old_value": nil,
   "new_value": 1
   }
   ```
 
-  对 `event` 来说，信息不充分。故，增加 `value_proc` 选项，即一个 `proc`，可以对默认的 `old|new_value` 进行求值，此时 `audited` 信息如下：
+  对 `event` 来说，信息不充分。故，增加 `value_proc` 选项，即一个 `proc`，可以对默认的 `old|new_value` 进行求值，此时 `parameters` 信息如下：
 
   ```ruby
-  "audited": {
+  "parameters": {
     "attribute": "assignee",
     "old_value": nil,
     "new_value": {
@@ -161,7 +164,8 @@ end
 - `events` 页面可以持续加载，目前参考 jquery-infinite-pages 实现
 
 实现说明：
-- 目前列出的是所有 `events`，没有按照 `user`, `team` 进行筛选；若要筛选，可以使用 `Event.find_by` 方法
+- 目前列出的是所有 `events`，没有按照 `user`, `team` 进行筛选；若要筛选，可以使用 `Event.find_by`，或者 `object.events` 方法
+- 定制展示内容，根据 `verb` 加载 partial view，见 [app/views/events](https://github.com/dylanninin/tower-events/tree/master/app/views/events)
 - 目前动态内容暂未国际化、本地化，如 `verb` 结合语义的翻译等
 - 下拉持续加载时，若下一页的分组日期与当前页相同时，尚未做合并
 
@@ -203,4 +207,10 @@ online: https://awesome-tower-events.herokuapp.com/
 
 # One more thing
 
-TODO
+review history
+- 实现过于复杂，代码不好读懂
+- model 层要『轻量』，只负责属性的读取和存储
+- 创建 event 属于 业务层，不应该是 model 层负责；可以放在 controller 或 service 层
+- 参考 [public-activity](https://github.com/chaps-io/public_activity)
+
+result: failed this test

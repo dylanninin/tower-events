@@ -5,10 +5,13 @@
     <a href="/<%= event.actor['type'].underscore.pluralize %>/<%= event.actor['id'] %>"><%= event.actor['name'] %></a>
   </div>
   <div class="event-body">
-    <% if %w(assign reassign reply set_due_to).include? event.verb %>
-    <%= render partial: "events/partial/#{event.verb}", locals: {event: event} %>
+    <%
+      curr_prefix, curr_partial = event.verb.split '.'
+    %>
+    <% if lookup_context.template_exists? curr_partial, "events/#{curr_prefix}", true %>
+      <%= render partial: "events/#{curr_prefix}/#{curr_partial}", locals: {event: event} %>
     <% else %>
-    <%= render partial: 'events/partial/default', locals: {event: event} %>
+      <%= render partial: "events/partial/default", locals: {event: event} %>
     <% end %>
   </div>
 </div>

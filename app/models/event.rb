@@ -16,7 +16,15 @@ class Event < ApplicationRecord
           ws << where("#{s}->'id' ? '#{i.id}' and #{s} -> 'type' ? '#{i.class.name}'")
         end
       end
-      ws << where(verb: opts[:verb]) if opts[:verb].present?
+
+      # Resolve verb
+      if opts[:verb].present?
+        verb = opts[:verb]
+        if opts[:object].present?
+          verb = resolve_verb opts[:object], opts[:verb]
+        end
+        ws << where(verb: verb)
+      end
       ws.inject(all, :merge)
     end
 
@@ -33,7 +41,7 @@ class Event < ApplicationRecord
       object = opts[:object]
       event = self.new
       event.actor = resolve_value object, opts[:actor]
-      event.verb = opts[:verb]
+      event.verb = resolve_verb object, opts[:verb]
       event.object = resolve_value object, :self
       event.parameters = resolve_value object, opts[:parameters]
       event.target = resolve_value object, opts[:target]
@@ -41,6 +49,17 @@ class Event < ApplicationRecord
       event.provider = resolve_value object, opts[:provider]
       event.published = object.updated_at
       event.save
+    end
+
+    # Resolve verb like: team.create, todo.assign
+    def resolve_verb(object, verb)
+      prefix = object.class.name.underscore + '.'
+      verb = verb.to_s
+      unless verb.start_with? prefix
+        prefix + verb
+      else
+        verb
+      end
     end
 
     def resolve_value(context, thing)
