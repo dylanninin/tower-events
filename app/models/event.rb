@@ -61,8 +61,8 @@ class Event < ApplicationRecord
       end
     end
 
+    # Resolve value based on context
     def resolve_value(context, thing)
-      value = nil
       value = case thing
               when :self
                 context
