@@ -1,6 +1,6 @@
 class Calendar < ApplicationRecord
   include Eventable
-  eventablize_opts actor: Proc.new { User.current }, provider: :self, generator: :team,
+  eventablize_opts actor: proc { User.current }, provider: :self, generator: :team,
                    as_json: {
                      only: [:name]
                    }

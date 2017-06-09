@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 module Eventable
   extend ActiveSupport::Concern
 
@@ -9,7 +11,7 @@ module Eventable
     # => see `eventablize_soft_delete` in `eventablize_ops_context`
     def soft_delete
       self.deleted_at = Time.now
-      self.save
+      save
     end
     alias_method :destroy, :soft_delete
 
@@ -21,17 +23,18 @@ module Eventable
     # To partial event: json format
     def as_partial_event
       opts = self.class.instance_variable_get(:@_eventablize_opts) || {}
-      json = self.as_json Event.resolve_value(self, opts[:as_json])
-      json[:created_at] = self.created_at
-      json[:updated_at] = self.updated_at
+      json = as_json Event.resolve_value(self, opts[:as_json])
+      json[:created_at] = created_at
+      json[:updated_at] = updated_at
       # TODO: Attribute type should be reserved
       json[:type] = self.class.name
       # FIXME: Convert id to string, for gin index in PostgreSQL
-      json[:id] = self.id.to_s
+      json[:id] = id.to_s
       json
     end
 
     private
+
     # To audit attrs
     def callback_around_update_attrs_changed
       yield
@@ -40,11 +43,11 @@ module Eventable
       audits.keys.each do |v|
         opts = base.merge audits[v]
         k = opts[:attr]
-        change = self.send(:"#{k}_change")
+        change = send(:"#{k}_change")
         next unless change.present?
 
         need_audit = true
-        %i(old_value? new_value?).each_with_index do |v, i|
+        %i[old_value? new_value?].each_with_index do |v, i|
           c = opts[v]
           next if c.blank?
           unless c.call(change[i])
@@ -61,9 +64,9 @@ module Eventable
         # => attr_alias is an alias for attr
         # => value_proc is the proc to get value of the attr
         opts[:parameters] = {
-          :attribute => opts[:attr_alias] || k,
-          :old_value => Event.resolve_value(change[0], opts[:value_proc] || :self),
-          :new_value => Event.resolve_value(change[1], opts[:value_proc] || :self),
+          attribute: opts[:attr_alias] || k,
+          old_value: Event.resolve_value(change[0], opts[:value_proc] || :self),
+          new_value: Event.resolve_value(change[1], opts[:value_proc] || :self)
         }
         opts[:object] = self
         Event.create_event(**opts)
@@ -71,7 +74,7 @@ module Eventable
     end
   end
 
-  AVALIABLE_OPS_CONTEXT_SCOPE = %i(create update destroy)
+  AVALIABLE_OPS_CONTEXT_SCOPE = %i[create update destroy].freeze
   module ClassMethods
     # Define global opts for current eventablized model
     # opts:
@@ -114,9 +117,9 @@ module Eventable
       return eventablize_on_attrs_changed(**opts) if opts[:attr].present?
       return eventablize_on_soft_delete if ctx == :destroy
 
-      base = self.instance_variable_get(:@_eventablize_opts) || {}
+      base = instance_variable_get(:@_eventablize_opts) || {}
       opts = base.merge opts
-      self.send(:after_commit, proc {
+      send(:after_commit, proc {
         opts[:verb] ||= ctx
         opts[:object] = self
         Event.create_event(**opts)
@@ -124,6 +127,7 @@ module Eventable
     end
 
     private
+
     # Define any audited attributes
     def eventablize_on_attrs_changed(opts = {})
       audited = instance_variable_get(:@_eventablize_on_attrs_changed) || {}
@@ -133,14 +137,14 @@ module Eventable
       # Avoid duplicated callbacks
       registered = instance_variable_get(:@_eventablize_on_attrs_changed_registered)
       if registered.blank?
-        self.send(:around_update, :callback_around_update_attrs_changed)
+        send(:around_update, :callback_around_update_attrs_changed)
         instance_variable_set(:@_eventablize_on_attrs_changed_registered, true)
       end
     end
 
     # For soft delete
     def eventablize_on_soft_delete
-      opts = { verb: :destroy, attr: :deleted_at, old_value?: -> (v) { v.nil? },  new_value?: -> (v) { v.present? } }
+      opts = { verb: :destroy, attr: :deleted_at, old_value?: ->(v) { v.nil? }, new_value?: ->(v) { v.present? } }
       eventablize_on_attrs_changed(**opts)
     end
   end

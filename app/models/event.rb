@@ -1,5 +1,6 @@
-class Event < ApplicationRecord
+# encoding: utf-8
 
+class Event < ApplicationRecord
   class << self
     # Find event by: pass norrmal model object
     # eg:
@@ -10,7 +11,7 @@ class Event < ApplicationRecord
     # => Event.find_by # return all events, same with Event.all
     def find_by(opts = {})
       ws = []
-      %i(actor object target generator provider).each do |s|
+      %i[actor object target generator provider].each do |s|
         i = opts[s]
         if i.present?
           ws << where("#{s}->'id' ? '#{i.id}' and #{s} -> 'type' ? '#{i.class.name}'")
@@ -20,9 +21,7 @@ class Event < ApplicationRecord
       # Resolve verb
       if opts[:verb].present?
         verb = opts[:verb]
-        if opts[:object].present?
-          verb = resolve_verb opts[:object], opts[:verb]
-        end
+        verb = resolve_verb opts[:object], opts[:verb] if opts[:object].present?
         ws << where(verb: verb)
       end
       ws.inject(all, :merge)
@@ -39,7 +38,7 @@ class Event < ApplicationRecord
     # parameters: Hash, optional. 指定 event.paramters.
     def create_event(opts = {})
       object = opts[:object]
-      event = self.new
+      event = new
       event.actor = resolve_value object, opts[:actor]
       event.verb = resolve_verb object, opts[:verb]
       event.object = resolve_value object, :self
@@ -55,31 +54,30 @@ class Event < ApplicationRecord
     def resolve_verb(object, verb)
       prefix = object.class.name.underscore + '.'
       verb = verb.to_s
-      unless verb.start_with? prefix
-        prefix + verb
-      else
+      if verb.start_with? prefix
         verb
+      else
+        prefix + verb
       end
     end
 
     def resolve_value(context, thing)
       value = nil
-      case thing
-      when :self
-        value = context
-      when Symbol
-        value = context.send thing
-      when Proc
-        value = thing.call(context)
-      else
-        value = thing
-      end
+      value = case thing
+              when :self
+                context
+              when Symbol
+                context.send thing
+              when Proc
+                thing.call(context)
+              else
+                thing
+              end
       if value.respond_to? :as_partial_event
         value.as_partial_event
       else
         value
       end
     end
-
   end
 end

@@ -1,6 +1,6 @@
 class Comment < ApplicationRecord
   include Eventable
-  eventablize_opts actor: Proc.new { User.current }, target: :commentable, provider: :provider, generator: :team,
+  eventablize_opts actor: proc { User.current }, target: :commentable, provider: :provider, generator: :team,
                    as_json: {
                      only: [:text]
                    }

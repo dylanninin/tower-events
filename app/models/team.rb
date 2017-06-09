@@ -1,6 +1,6 @@
 class Team < ApplicationRecord
   include Eventable
-  eventablize_opts actor: Proc.new { User.current }, provider: :self, generator: :self,
+  eventablize_opts actor: proc { User.current }, provider: :self, generator: :self,
                    as_json: {
                      only: [:name]
                    }
